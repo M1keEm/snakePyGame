@@ -46,10 +46,29 @@ class Fruit:
         self.image = pygame.transform.scale(self.image, (snake_block, snake_block))
         self.reset_position()
 
-    def reset_position(self):
-        """Reset the fruit's position to a random location on the grid."""
-        self.x = round(random.randrange(0, self.width - self.snake_block) / self.snake_block) * self.snake_block
-        self.y = round(random.randrange(0, self.height - self.snake_block) / self.snake_block) * self.snake_block
+    def is_position_valid(self, snake_list, other_fruits):
+        """Check if the fruit's position is valid (not overlapping with the snake or other fruits)."""
+        if snake_list:
+            for block in snake_list:
+                if block[0] == self.x and block[1] == self.y:
+                    return False
+
+        if other_fruits:
+            for fruit in other_fruits:
+                if fruit != self and fruit.x == self.x and fruit.y == self.y:
+                    return False
+
+        return True
+
+    def reset_position(self, snake_list=None, other_fruits=None):
+        """Reset the fruit's position to a random location on the grid, ensuring it doesn't overlap with the snake or other fruits."""
+        while True:
+            self.x = round(random.randrange(0, self.width - self.snake_block) / self.snake_block) * self.snake_block
+            self.y = round(random.randrange(0, self.height - self.snake_block) / self.snake_block) * self.snake_block
+
+            # Check if the new position is valid
+            if self.is_position_valid(snake_list, other_fruits):
+                break
 
     def draw(self, window):
         """Draw the fruit on the window."""
@@ -298,7 +317,7 @@ def game_loop():
         # check if snake eats any fruit
         for fruit in fruits:
             if fruit.is_eaten(snake_head):
-                fruit.reset_position()
+                fruit.reset_position(snake_list, fruits)
                 snake_length += 1
                 eating = True  # start eating animation
                 eating_start_time = pygame.time.get_ticks()
