@@ -29,7 +29,7 @@ FONT_STYLE = pygame.font.SysFont("bahnschrift", 40)
 SCORE_FONT = pygame.font.SysFont("comicsans", 35)
 MENU_FONT = pygame.font.SysFont("comicsansms", 50)
 
-MENU_BACKGROUND = pygame.image.load("resources/apple.png")
+MENU_BACKGROUND = pygame.image.load("resources/menu_background.png")
 MENU_BACKGROUND = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
 
 APPLE_IMG = pygame.image.load("resources/apple.png")
