@@ -20,6 +20,7 @@ pygame.display.set_caption("Snake Game")
 # clock - game speed
 CLOCK = pygame.time.Clock()
 fps = 20
+SNAKE_BLOCK = 10  # snake moves 10 pixels at a time
 
 # font style
 FONT_STYLE = pygame.font.SysFont(None, 50)
@@ -43,24 +44,61 @@ def game_loop():
     game_over = False
     game_close = False
 
+    # initial snake position
+    x1, y1 = WIDTH / 2, HEIGHT / 2
+    x1_change, y1_change = 0, 0
+
+    # snake body
+    snake_length = 1
+    snake_list = []
+
+    # food position
+    food_x = round(random.randrange(0, WIDTH - 10) / 10.0) * 10.0
+    food_y = round(random.randrange(0, HEIGHT - 10) / 10.0) * 10.0
+
     while not game_over:
         while game_close:
             WINDOW.fill(BLACK)
-            message = FONT_STYLE.render("You Lost! Press Q-Quit or C-Play Again", True, RED)
+            message = FONT_STYLE.render("You Lost! Press Q-Quit or Space-Play Again", True, RED)
             WINDOW.blit(message, [WIDTH / 6, HEIGHT / 3])
             pygame.display.update()
 
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
+                    if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
                         game_over = True
                         game_close = False
-                    if event.key == pygame.K_c:
+                    if event.key == pygame.K_SPACE:
                         game_loop()
+                if event.type == pygame.QUIT:
+                    game_over = True
+                    game_close = False
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT and x1_change == 0:
+                    x1_change = -SNAKE_BLOCK
+                    y1_change = 0
+                elif event.key == pygame.K_RIGHT and x1_change == 0:
+                    x1_change = SNAKE_BLOCK
+                    y1_change = 0
+                elif event.key == pygame.K_UP and y1_change == 0:
+                    y1_change = -SNAKE_BLOCK
+                    x1_change = 0
+                elif event.key == pygame.K_DOWN and y1_change == 0:
+                    y1_change = SNAKE_BLOCK
+                    x1_change = 0
+
+        # check if snake hits the wall
+        if x1 >= WIDTH or x1 < 0 or y1 >= HEIGHT or y1 < 0:
+            game_close = True
+
+        # update snake position
+        x1 += x1_change
+        y1 += y1_change
+        WINDOW.fill(BLACK)
 
         WINDOW.fill(BLUE)
         pygame.display.update()
