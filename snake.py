@@ -1,6 +1,5 @@
-import pygame
-import time
 import random
+import pygame
 
 pygame.init()
 
@@ -12,15 +11,17 @@ GREEN = (0, 255, 0)
 YELLOW = (255, 255, 102)
 BLUE = (50, 153, 213)
 
+SNAKE_BLOCK = 20  # snake moves 10 pixels at a time
+CELL_NUMBER = 40
+
 # display settings
-WIDTH, HEIGHT = 600, 400
+WIDTH, HEIGHT = SNAKE_BLOCK * CELL_NUMBER, SNAKE_BLOCK * CELL_NUMBER
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Snake Game")
 
 # clock - game speed
 CLOCK = pygame.time.Clock()
 fps = 10
-SNAKE_BLOCK = 20  # snake moves 10 pixels at a time
 
 # font style
 FONT_STYLE = pygame.font.SysFont("bahnschrift", 40)
@@ -55,6 +56,31 @@ def main_menu():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
+
+
+class Fruit:
+    def __init__(self, snake_block, width, height):
+        self.x = None
+        self.y = None
+        self.snake_block = snake_block
+        self.width = width
+        self.height = height
+        self.image = pygame.image.load("resources/apple.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (snake_block, snake_block))
+        self.reset_position()
+
+    def reset_position(self):
+        """Reset the fruit's position to a random location on the grid."""
+        self.x = round(random.randrange(0, self.width - self.snake_block) / self.snake_block) * self.snake_block
+        self.y = round(random.randrange(0, self.height - self.snake_block) / self.snake_block) * self.snake_block
+
+    def draw(self, window):
+        """Draw the fruit on the window."""
+        window.blit(self.image, (self.x, self.y))
+
+    def is_eaten(self, snake_head):
+        """Check if the snake's head has collided with the fruit."""
+        return snake_head[0] == self.x and snake_head[1] == self.y
 
 
 class Particle:
@@ -180,9 +206,8 @@ def game_loop():
     snake_length = 1
     snake_list = []
 
-    # food position
-    food_x = round(random.randrange(0, WIDTH - 20) / 20.0) * 20.0
-    food_y = round(random.randrange(0, HEIGHT - 20) / 20.0) * 20.0
+    # create a Fruit object
+    fruit = Fruit(SNAKE_BLOCK, WIDTH, HEIGHT)
 
     # eye animation logic
     eye_state = True  # True for open, False for closed
@@ -247,10 +272,10 @@ def game_loop():
         # update snake position
         x1 += x1_change
         y1 += y1_change
-        WINDOW.fill(BLUE)
+        WINDOW.fill((175, 215, 70))
 
         # draw food
-        WINDOW.blit(APPLE_IMG, (food_x, food_y))
+        fruit.draw(WINDOW)
         # pygame.draw.circle(WINDOW, RED, (int(food_x + SNAKE_BLOCK // 2), int(food_y + SNAKE_BLOCK // 2)),
         #                    SNAKE_BLOCK // 2)
 
@@ -272,16 +297,15 @@ def game_loop():
             last_blink_time = current_time
 
         # check if snake eats the food
-        if x1 == food_x and y1 == food_y:
-            food_x = round(random.randrange(0, WIDTH - 20) / 20.0) * 20.0
-            food_y = round(random.randrange(0, HEIGHT - 20) / 20.0) * 20.0
+        if fruit.is_eaten(snake_head):
+            fruit.reset_position()
             snake_length += 1
             eating = True  # start eating animation
             eating_start_time = pygame.time.get_ticks()
 
             # create particles
             for _ in range(20):  # create 20 particles
-                particles.append(Particle(food_x + SNAKE_BLOCK // 2, food_y + SNAKE_BLOCK // 2, RED))
+                particles.append(Particle(fruit.x + SNAKE_BLOCK // 2, fruit.y + SNAKE_BLOCK // 2, RED))
 
         # update eating animation
         if eating and current_time - eating_start_time > eating_duration:
