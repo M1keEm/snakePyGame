@@ -38,6 +38,9 @@ def display_score(score):
     value = SCORE_FONT.render("Score: " + str(score), True, YELLOW)
     WINDOW.blit(value, [0, 0])  # draw the score on top of the window
 
+def message(msg, color):
+    mesg = FONT_STYLE.render(msg, True, color)
+    WINDOW.blit(mesg, [WIDTH / 6, HEIGHT / 3])
 
 # main game loop
 def game_loop():
@@ -59,9 +62,8 @@ def game_loop():
     while not game_over:
         while game_close:
             WINDOW.fill(BLACK)
-            message = FONT_STYLE.render("You Lost! Press Q-Quit or Space-Play Again", True, RED)
+            message("You Lost! Press Q-Quit or Space-Play Again", RED)
             display_score(snake_length - 1)
-            WINDOW.blit(message, [10, HEIGHT / 3])
             pygame.display.update()
 
             for event in pygame.event.get():
@@ -120,7 +122,8 @@ def game_loop():
         # display current score
         display_score(snake_length - 1)
 
-        # WINDOW.fill(BLUE)
+
+
         pygame.display.update()
         CLOCK.tick(fps)
 
