@@ -23,8 +23,8 @@ fps = 5
 SNAKE_BLOCK = 10  # snake moves 10 pixels at a time
 
 # font style
-FONT_STYLE = pygame.font.SysFont(None, 50)
-SCORE_FONT = pygame.font.SysFont(None, 35)
+FONT_STYLE = pygame.font.SysFont("bahnschrift", 40)
+SCORE_FONT = pygame.font.SysFont("comicsans", 35)
 
 
 # drawing the snake
@@ -60,7 +60,8 @@ def game_loop():
         while game_close:
             WINDOW.fill(BLACK)
             message = FONT_STYLE.render("You Lost! Press Q-Quit or Space-Play Again", True, RED)
-            WINDOW.blit(message, [WIDTH / 6, HEIGHT / 3])
+            display_score(snake_length - 1)
+            WINDOW.blit(message, [10, HEIGHT / 3])
             pygame.display.update()
 
             for event in pygame.event.get():
@@ -98,7 +99,7 @@ def game_loop():
         # update snake position
         x1 += x1_change
         y1 += y1_change
-        WINDOW.fill(BLACK)
+        WINDOW.fill(BLUE)
 
         # draw food
         pygame.draw.rect(WINDOW, RED, [food_x + 1, food_y + 1, SNAKE_BLOCK - 1, SNAKE_BLOCK - 1])
