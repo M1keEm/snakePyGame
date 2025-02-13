@@ -19,7 +19,7 @@ pygame.display.set_caption("Snake Game")
 
 # clock - game speed
 CLOCK = pygame.time.Clock()
-fps = 5
+fps = 30
 SNAKE_BLOCK = 10  # snake moves 10 pixels at a time
 
 # font style
@@ -40,7 +40,7 @@ def display_score(score):
 
 def message(msg, color):
     mesg = FONT_STYLE.render(msg, True, color)
-    WINDOW.blit(mesg, [WIDTH / 6, HEIGHT / 3])
+    WINDOW.blit(mesg, [10, HEIGHT / 2.5])
 
 # main game loop
 def game_loop():
