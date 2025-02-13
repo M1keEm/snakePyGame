@@ -19,7 +19,7 @@ pygame.display.set_caption("Snake Game")
 
 # clock - game speed
 CLOCK = pygame.time.Clock()
-fps = 20
+fps = 10
 SNAKE_BLOCK = 20  # snake moves 10 pixels at a time
 
 # font style
@@ -27,11 +27,12 @@ FONT_STYLE = pygame.font.SysFont("bahnschrift", 40)
 SCORE_FONT = pygame.font.SysFont("comicsans", 35)
 MENU_FONT = pygame.font.SysFont("comicsansms", 50)
 
-MENU_BACKGROUND = pygame.image.load("resources/menu_background.png")
+MENU_BACKGROUND = pygame.image.load("resources/apple.png")
 MENU_BACKGROUND = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
 
 APPLE_IMG = pygame.image.load("resources/apple.png")
 APPLE_IMG = pygame.transform.scale(APPLE_IMG, (20, 20))
+
 
 def main_menu():
     menu = True
@@ -110,14 +111,23 @@ def draw_snake(snake_block, snake_list, eye_state, direction, eating):
                 pygame.draw.circle(WINDOW, BLACK, eye2_pos, eye_radius // 1.5)
 
             if eating:
+                tongue_width = 8  # Increased width of the tongue
+                tongue_height = 8  # Increased height of the tongue
                 if direction == "RIGHT":
-                    pygame.draw.rect(WINDOW, RED, [head_x + snake_block, head_y + snake_block // 2 - 2, 4, 4])
+                    pygame.draw.rect(WINDOW, RED, [head_x + snake_block, head_y + snake_block // 2 - tongue_height // 2,
+                                                   tongue_width, tongue_height])
                 elif direction == "LEFT":
-                    pygame.draw.rect(WINDOW, RED, [head_x - 4, head_y + snake_block // 2 - 2, 4, 4])
+                    pygame.draw.rect(WINDOW, RED,
+                                     [head_x - tongue_width, head_y + snake_block // 2 - tongue_height // 2,
+                                      tongue_width, tongue_height])
                 elif direction == "DOWN":
-                    pygame.draw.rect(WINDOW, RED, [head_x + snake_block // 2 - 2, head_y + snake_block, 4, 4])
+                    pygame.draw.rect(WINDOW, RED,
+                                     [head_x + snake_block // 2 - tongue_width // 2, head_y + snake_block, tongue_width,
+                                      tongue_height])
                 elif direction == "UP":
-                    pygame.draw.rect(WINDOW, RED, [head_x + snake_block // 2 - 2, head_y - 4, 4, 4])
+                    pygame.draw.rect(WINDOW, RED,
+                                     [head_x + snake_block // 2 - tongue_width // 2, head_y - tongue_height,
+                                      tongue_width, tongue_height])
 
 
 # display player's score
