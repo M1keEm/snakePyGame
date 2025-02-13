@@ -55,7 +55,7 @@ def main_menu():
 
 
 # drawing the snake
-def draw_snake(snake_block, snake_list, eye_state, direction):
+def draw_snake(snake_block, snake_list, eye_state, direction, eating):
     for i, block in enumerate(snake_list):
         pygame.draw.rect(WINDOW, GREEN, [block[0], block[1], snake_block, snake_block])
 
@@ -88,8 +88,15 @@ def draw_snake(snake_block, snake_list, eye_state, direction):
                 pygame.draw.circle(WINDOW, BLACK, eye1_pos, eye_radius // 1.5)
                 pygame.draw.circle(WINDOW, BLACK, eye2_pos, eye_radius // 1.5)
 
-            # pygame.draw.circle(WINDOW, BLACK, eye1_pos, eye_radius)
-            # pygame.draw.circle(WINDOW, BLACK, eye2_pos, eye_radius)
+            if eating:
+                if direction == "RIGHT":
+                    pygame.draw.rect(WINDOW, RED, [head_x + snake_block, head_y + snake_block // 2 - 2, 4, 4])
+                elif direction == "LEFT":
+                    pygame.draw.rect(WINDOW, RED, [head_x - 4, head_y + snake_block // 2 - 2, 4, 4])
+                elif direction == "DOWN":
+                    pygame.draw.rect(WINDOW, RED, [head_x + snake_block // 2 - 2, head_y + snake_block, 4, 4])
+                elif direction == "UP":
+                    pygame.draw.rect(WINDOW, RED, [head_x + snake_block // 2 - 2, head_y - 4, 4, 4])
 
 
 # display player's score
@@ -152,7 +159,12 @@ def game_loop():
     blink_interval = random.randint(500, 1500)  # Random interval between 300ms and 800ms
 
     # track the snake's direction
-    direction = "RIGHT" # initial direction
+    direction = "RIGHT"  # initial direction
+
+    # eating animation logic
+    eating = False  # True if the snake is eating
+    eating_start_time = 0  # time when the snake starts eating
+    eating_duration = 400  # duration of the eating animation in milliseconds
 
     while not game_over:
         while game_close:
@@ -223,17 +235,22 @@ def game_loop():
             eye_state = not eye_state  # toggle eye state
             last_blink_time = current_time
 
-        # draw the snake
-        draw_snake(SNAKE_BLOCK, snake_list, eye_state, direction)
-        # display current score
-        display_score(snake_length - 1)
-        pygame.display.update()
-
         # check if snake eats the food
         if x1 == food_x and y1 == food_y:
             food_x = round(random.randrange(0, WIDTH - 10) / 10.0) * 10.0
             food_y = round(random.randrange(0, HEIGHT - 10) / 10.0) * 10.0
             snake_length += 1
+            eating = True  # start eating animation
+            eating_start_time = pygame.time.get_ticks()
+
+        if eating and current_time - eating_start_time > eating_duration:
+            eating = False  # stop eating animation
+
+        # draw the snake
+        draw_snake(SNAKE_BLOCK, snake_list, eye_state, direction, eating)
+        # display current score
+        display_score(snake_length - 1)
+        pygame.display.update()
 
         CLOCK.tick(fps)
 
