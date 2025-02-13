@@ -19,7 +19,7 @@ pygame.display.set_caption("Snake Game")
 
 # clock - game speed
 CLOCK = pygame.time.Clock()
-fps = 20
+fps = 5
 SNAKE_BLOCK = 10  # snake moves 10 pixels at a time
 
 # font style
@@ -100,7 +100,26 @@ def game_loop():
         y1 += y1_change
         WINDOW.fill(BLACK)
 
-        WINDOW.fill(BLUE)
+        # draw food
+        pygame.draw.rect(WINDOW, RED, [food_x + 1, food_y + 1, SNAKE_BLOCK - 1, SNAKE_BLOCK - 1])
+
+        # add snake head to the snake list
+        snake_head = [x1, y1]
+        snake_list.append(snake_head)
+        if len(snake_list) > snake_length:
+            del snake_list[0]  # remove the tail of the snake
+
+        # check if snake hits itself
+        for block in snake_list[:-1]:
+            if block == snake_head:
+                game_close = True
+
+        # draw the snake
+        draw_snake(SNAKE_BLOCK, snake_list)
+        # display current score
+        display_score(snake_length - 1)
+
+        # WINDOW.fill(BLUE)
         pygame.display.update()
         CLOCK.tick(fps)
 
