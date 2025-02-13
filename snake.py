@@ -97,6 +97,7 @@ class Particle:
         if self.lifespan > 0:
             pygame.draw.circle(WINDOW, self.color, (int(self.x), int(self.y)), 1)
 
+eat_sound = pygame.mixer.Sound("resources/eat_sound.wav")
 
 def main_menu():
     menu = True
@@ -321,6 +322,9 @@ def game_loop():
                 snake_length += 1
                 eating = True  # start eating animation
                 eating_start_time = pygame.time.get_ticks()
+
+                # play eat sound
+                eat_sound.play()
 
                 # create particles
                 for _ in range(20):  # create 20 particles
