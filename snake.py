@@ -20,7 +20,7 @@ pygame.display.set_caption("Snake Game")
 # clock - game speed
 CLOCK = pygame.time.Clock()
 fps = 20
-SNAKE_BLOCK = 10  # snake moves 10 pixels at a time
+SNAKE_BLOCK = 20  # snake moves 10 pixels at a time
 
 # font style
 FONT_STYLE = pygame.font.SysFont("bahnschrift", 40)
@@ -30,6 +30,8 @@ MENU_FONT = pygame.font.SysFont("comicsansms", 50)
 MENU_BACKGROUND = pygame.image.load("resources/menu_background.png")
 MENU_BACKGROUND = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
 
+APPLE_IMG = pygame.image.load("resources/apple.png")
+APPLE_IMG = pygame.transform.scale(APPLE_IMG, (20, 20))
 
 def main_menu():
     menu = True
@@ -54,6 +56,25 @@ def main_menu():
                 quit()
 
 
+class Particle:
+    def __init__(self, x, y, color):
+        self.x = x
+        self.y = y
+        self.color = color
+        self.vx = random.uniform(-1, 1)  # Random horizontal velocity
+        self.vy = random.uniform(-1, 1)  # Random vertical velocity
+        self.lifespan = 30  # Number of frames the particle will live
+
+    def update(self):
+        self.x += self.vx
+        self.y += self.vy
+        self.lifespan -= 1
+
+    def draw(self):
+        if self.lifespan > 0:
+            pygame.draw.circle(WINDOW, self.color, (int(self.x), int(self.y)), 1)
+
+
 # drawing the snake
 def draw_snake(snake_block, snake_list, eye_state, direction, eating):
     for i, block in enumerate(snake_list):
@@ -62,8 +83,8 @@ def draw_snake(snake_block, snake_list, eye_state, direction, eating):
         # draw eyes on the head of the snake
         if i == len(snake_list) - 1:  # check if it's the head
             head_x, head_y = block[0], block[1]
-            eye_radius = 2  # radius of the eye
-            eye_offset = 3  # distance from the edge of the head
+            eye_radius = 4  # radius of the eye
+            eye_offset = 5  # distance from the edge of the head
 
             # determine the direction of the snake
             if direction == "RIGHT":
@@ -150,8 +171,8 @@ def game_loop():
     snake_list = []
 
     # food position
-    food_x = round(random.randrange(0, WIDTH - 10) / 10.0) * 10.0
-    food_y = round(random.randrange(0, HEIGHT - 10) / 10.0) * 10.0
+    food_x = round(random.randrange(0, WIDTH - 20) / 20.0) * 20.0
+    food_y = round(random.randrange(0, HEIGHT - 20) / 20.0) * 20.0
 
     # eye animation logic
     eye_state = True  # True for open, False for closed
@@ -165,6 +186,9 @@ def game_loop():
     eating = False  # True if the snake is eating
     eating_start_time = 0  # time when the snake starts eating
     eating_duration = 400  # duration of the eating animation in milliseconds
+
+    # particles system
+    particles = []
 
     while not game_over:
         while game_close:
@@ -189,19 +213,19 @@ def game_loop():
             if event.type == pygame.QUIT:
                 game_over = True
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT and x1_change == 0:
+                if event.key == pygame.K_LEFT and direction != "RIGHT":
                     x1_change = -SNAKE_BLOCK
                     y1_change = 0
                     direction = "LEFT"
-                elif event.key == pygame.K_RIGHT and x1_change == 0:
+                elif event.key == pygame.K_RIGHT and direction != "LEFT":
                     x1_change = SNAKE_BLOCK
                     y1_change = 0
                     direction = "RIGHT"
-                elif event.key == pygame.K_UP and y1_change == 0:
+                elif event.key == pygame.K_UP and direction != "DOWN":
                     y1_change = -SNAKE_BLOCK
                     x1_change = 0
                     direction = "UP"
-                elif event.key == pygame.K_DOWN and y1_change == 0:
+                elif event.key == pygame.K_DOWN and direction != "UP":
                     y1_change = SNAKE_BLOCK
                     x1_change = 0
                     direction = "DOWN"
@@ -216,7 +240,9 @@ def game_loop():
         WINDOW.fill(BLUE)
 
         # draw food
-        pygame.draw.rect(WINDOW, RED, [food_x + 1, food_y + 1, SNAKE_BLOCK - 1, SNAKE_BLOCK - 1])
+        WINDOW.blit(APPLE_IMG, (food_x, food_y))
+        # pygame.draw.circle(WINDOW, RED, (int(food_x + SNAKE_BLOCK // 2), int(food_y + SNAKE_BLOCK // 2)),
+        #                    SNAKE_BLOCK // 2)
 
         # add snake head to the snake list
         snake_head = [x1, y1]
@@ -237,14 +263,26 @@ def game_loop():
 
         # check if snake eats the food
         if x1 == food_x and y1 == food_y:
-            food_x = round(random.randrange(0, WIDTH - 10) / 10.0) * 10.0
-            food_y = round(random.randrange(0, HEIGHT - 10) / 10.0) * 10.0
+            food_x = round(random.randrange(0, WIDTH - 20) / 20.0) * 20.0
+            food_y = round(random.randrange(0, HEIGHT - 20) / 20.0) * 20.0
             snake_length += 1
             eating = True  # start eating animation
             eating_start_time = pygame.time.get_ticks()
 
+            # create particles
+            for _ in range(20):  # create 20 particles
+                particles.append(Particle(food_x + SNAKE_BLOCK // 2, food_y + SNAKE_BLOCK // 2, RED))
+
+        # update eating animation
         if eating and current_time - eating_start_time > eating_duration:
             eating = False  # stop eating animation
+
+        # Update and draw particles
+        for particle in particles[:]:
+            particle.update()
+            particle.draw()
+            if particle.lifespan <= 0:
+                particles.remove(particle)
 
         # draw the snake
         draw_snake(SNAKE_BLOCK, snake_list, eye_state, direction, eating)
