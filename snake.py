@@ -55,7 +55,7 @@ def main_menu():
 
 
 # drawing the snake
-def draw_snake(snake_block, snake_list, eye_state):
+def draw_snake(snake_block, snake_list, eye_state, direction):
     for i, block in enumerate(snake_list):
         pygame.draw.rect(WINDOW, GREEN, [block[0], block[1], snake_block, snake_block])
 
@@ -66,22 +66,16 @@ def draw_snake(snake_block, snake_list, eye_state):
             eye_offset = 3  # distance from the edge of the head
 
             # determine the direction of the snake
-            if len(snake_list) > 1:
-                prev_x, prev_y = snake_list[-2][0], snake_list[-2][1]
-                if prev_x < head_x:  # Moving right
-                    eye1_pos = (head_x + snake_block - eye_offset, head_y + eye_offset)
-                    eye2_pos = (head_x + snake_block - eye_offset, head_y + snake_block - eye_offset)
-                elif prev_x > head_x:  # Moving left
-                    eye1_pos = (head_x + eye_offset, head_y + eye_offset)
-                    eye2_pos = (head_x + eye_offset, head_y + snake_block - eye_offset)
-                elif prev_y < head_y:  # Moving down
-                    eye1_pos = (head_x + eye_offset, head_y + snake_block - eye_offset)
-                    eye2_pos = (head_x + snake_block - eye_offset, head_y + snake_block - eye_offset)
-                elif prev_y > head_y:  # Moving up
-                    eye1_pos = (head_x + eye_offset, head_y + eye_offset)
-                    eye2_pos = (head_x + snake_block - eye_offset, head_y + eye_offset)
-            else:
-                # Default position if the snake has no direction yet
+            if direction == "RIGHT":
+                eye1_pos = (head_x + snake_block - eye_offset, head_y + eye_offset)
+                eye2_pos = (head_x + snake_block - eye_offset, head_y + snake_block - eye_offset)
+            elif direction == "LEFT":
+                eye1_pos = (head_x + eye_offset, head_y + eye_offset)
+                eye2_pos = (head_x + eye_offset, head_y + snake_block - eye_offset)
+            elif direction == "DOWN":
+                eye1_pos = (head_x + eye_offset, head_y + snake_block - eye_offset)
+                eye2_pos = (head_x + snake_block - eye_offset, head_y + snake_block - eye_offset)
+            elif direction == "UP":
                 eye1_pos = (head_x + eye_offset, head_y + eye_offset)
                 eye2_pos = (head_x + snake_block - eye_offset, head_y + eye_offset)
 
@@ -157,6 +151,9 @@ def game_loop():
     last_blink_time = pygame.time.get_ticks()
     blink_interval = random.randint(500, 1500)  # Random interval between 300ms and 800ms
 
+    # track the snake's direction
+    direction = "RIGHT" # initial direction
+
     while not game_over:
         while game_close:
             WINDOW.fill(BLACK)
@@ -183,15 +180,19 @@ def game_loop():
                 if event.key == pygame.K_LEFT and x1_change == 0:
                     x1_change = -SNAKE_BLOCK
                     y1_change = 0
+                    direction = "LEFT"
                 elif event.key == pygame.K_RIGHT and x1_change == 0:
                     x1_change = SNAKE_BLOCK
                     y1_change = 0
+                    direction = "RIGHT"
                 elif event.key == pygame.K_UP and y1_change == 0:
                     y1_change = -SNAKE_BLOCK
                     x1_change = 0
+                    direction = "UP"
                 elif event.key == pygame.K_DOWN and y1_change == 0:
                     y1_change = SNAKE_BLOCK
                     x1_change = 0
+                    direction = "DOWN"
 
         # check if snake hits the wall
         if x1 >= WIDTH or x1 < 0 or y1 >= HEIGHT or y1 < 0:
@@ -223,7 +224,7 @@ def game_loop():
             last_blink_time = current_time
 
         # draw the snake
-        draw_snake(SNAKE_BLOCK, snake_list, eye_state)
+        draw_snake(SNAKE_BLOCK, snake_list, eye_state, direction)
         # display current score
         display_score(snake_length - 1)
         pygame.display.update()
