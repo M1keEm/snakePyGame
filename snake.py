@@ -36,7 +36,7 @@ def main_menu():
         # WINDOW.fill(BLACK)
         WINDOW.blit(MENU_BACKGROUND, (0, 0))
         message("Welcome to Snake Game!", WHITE, -50, MENU_FONT)
-        message("Press SPACE to play", WHITE)
+        message("Press SPACE to play", WHITE, 0)
         message("Press Q/ESCAPE to quit", WHITE, 50)
 
         pygame.display.update()
@@ -65,9 +65,35 @@ def display_score(score):
     WINDOW.blit(value, [0, 0])  # draw the score on top of the window
 
 
-def message(msg, color, y_offset=0, font=FONT_STYLE):
-    mesg = FONT_STYLE.render(msg, True, color)
-    WINDOW.blit(mesg, [10, HEIGHT / 2.5 + y_offset])
+def message(msg, color, y_offset=0, font=None):
+    if font is None:
+        font = FONT_STYLE
+
+    # text wrapping
+    words = msg.split(' ')
+    lines = []
+    current_line = ''
+    for word in words:
+        # check if adding the word to the current line will exceed the width of the window
+        test_line = current_line + ' ' + word if current_line else word
+        test_width, _ = font.size(test_line) # get the width of the text, ignore the height
+        if test_width > WIDTH - 40:
+            lines.append(current_line)
+            current_line = word
+        else:
+            current_line = test_line
+    if current_line:
+        lines.append(current_line) # add the last line
+
+    total_height = len(lines) * font.get_height()
+    y_start = (HEIGHT - total_height) / 2 + y_offset
+
+    for i, line in enumerate(lines):
+        test_surface = font.render(line, True, color)
+        text_rect = test_surface.get_rect(center=(WIDTH / 2, y_start + i * font.get_height()))
+        WINDOW.blit(test_surface, text_rect)
+    # mesg = FONT_STYLE.render(msg, True, color)
+    # WINDOW.blit(mesg, [10, HEIGHT / 2.5 + y_offset])
 
 
 # main game loop
