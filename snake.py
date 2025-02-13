@@ -13,13 +13,13 @@ YELLOW = (255, 255, 102)
 BLUE = (50, 153, 213)
 
 # display settings
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 600, 400
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Snake Game")
 
 # clock - game speed
 CLOCK = pygame.time.Clock()
-fps = 30
+fps = 20
 SNAKE_BLOCK = 10  # snake moves 10 pixels at a time
 
 # font style
@@ -55,9 +55,37 @@ def main_menu():
 
 # drawing the snake
 def draw_snake(snake_block, snake_list):
-    for block in snake_list:
+    for i, block in enumerate(snake_list):
         pygame.draw.rect(WINDOW, GREEN, [block[0], block[1], snake_block, snake_block])
 
+        # draw eyes on the head of the snake
+        if i == len(snake_list) - 1: # check if it's the head
+            head_x, head_y = block[0], block[1]
+            eye_radius = 2 # radius of the eye
+            eye_offset = 3 # distance from the edge of the head
+
+            # determine the direction of the snake
+            if len(snake_list) > 1:
+                prev_x, prev_y = snake_list[-2][0], snake_list[-2][1]
+                if prev_x < head_x:  # Moving right
+                    eye1_pos = (head_x + snake_block - eye_offset, head_y + eye_offset)
+                    eye2_pos = (head_x + snake_block - eye_offset, head_y + snake_block - eye_offset)
+                elif prev_x > head_x:  # Moving left
+                    eye1_pos = (head_x + eye_offset, head_y + eye_offset)
+                    eye2_pos = (head_x + eye_offset, head_y + snake_block - eye_offset)
+                elif prev_y < head_y:  # Moving down
+                    eye1_pos = (head_x + eye_offset, head_y + snake_block - eye_offset)
+                    eye2_pos = (head_x + snake_block - eye_offset, head_y + snake_block - eye_offset)
+                elif prev_y > head_y:  # Moving up
+                    eye1_pos = (head_x + eye_offset, head_y + eye_offset)
+                    eye2_pos = (head_x + snake_block - eye_offset, head_y + eye_offset)
+            else:
+                # Default position if the snake has no direction yet
+                eye1_pos = (head_x + eye_offset, head_y + eye_offset)
+                eye2_pos = (head_x + snake_block - eye_offset, head_y + eye_offset)
+
+            pygame.draw.circle(WINDOW, BLACK, eye1_pos, eye_radius)
+            pygame.draw.circle(WINDOW, BLACK, eye2_pos, eye_radius)
 
 # display player's score
 def display_score(score):
@@ -85,15 +113,15 @@ def message(msg, color, y_offset=0, font=None):
     if current_line:
         lines.append(current_line) # add the last line
 
+    # calculate the y position of the text and center it
     total_height = len(lines) * font.get_height()
     y_start = (HEIGHT - total_height) / 2 + y_offset
 
+    # draw the text
     for i, line in enumerate(lines):
         test_surface = font.render(line, True, color)
         text_rect = test_surface.get_rect(center=(WIDTH / 2, y_start + i * font.get_height()))
         WINDOW.blit(test_surface, text_rect)
-    # mesg = FONT_STYLE.render(msg, True, color)
-    # WINDOW.blit(mesg, [10, HEIGHT / 2.5 + y_offset])
 
 
 # main game loop
