@@ -29,10 +29,10 @@ FONT_STYLE = pygame.font.SysFont("bahnschrift", 40)
 SCORE_FONT = pygame.font.SysFont("comicsans", 35)
 MENU_FONT = pygame.font.SysFont("comicsansms", 50)
 
-MENU_BACKGROUND = pygame.image.load("resources/menu_background.png")
+MENU_BACKGROUND = pygame.image.load("dist/resources/menu_background.png")
 MENU_BACKGROUND = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
 
-APPLE_IMG = pygame.image.load("resources/apple.png")
+APPLE_IMG = pygame.image.load("dist/resources/apple.png")
 APPLE_IMG = pygame.transform.scale(APPLE_IMG, (20, 20))
 
 
@@ -43,7 +43,7 @@ class Fruit:
         self.snake_block = snake_block
         self.width = width
         self.height = height
-        self.image = pygame.image.load("resources/apple.png").convert_alpha()
+        self.image = pygame.image.load("dist/resources/apple.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (snake_block, snake_block))
         self.reset_position()
 
@@ -98,7 +98,7 @@ class Particle:
         if self.lifespan > 0:
             pygame.draw.circle(WINDOW, self.color, (int(self.x), int(self.y)), 1)
 
-eat_sound = pygame.mixer.Sound("resources/eat_sound.wav")
+eat_sound = pygame.mixer.Sound("dist/resources/eat_sound.wav")
 
 def main_menu():
     menu = True
@@ -222,7 +222,7 @@ def game_loop():
     global current_fps
 
     # background music
-    pygame.mixer.music.load("resources/background_music.mp3")
+    pygame.mixer.music.load("dist/resources/background_music.mp3")
     pygame.mixer.music.play(-1)  # loop indefinitely
     pygame.mixer.music.set_volume(0.0)
 
