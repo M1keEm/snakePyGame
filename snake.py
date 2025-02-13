@@ -217,6 +217,11 @@ def message(msg, color, y_offset=0, font=None):
 def game_loop():
     game_over = False
     game_close = False
+    paused = False
+    # background music
+    pygame.mixer.music.load("resources/background_music.mp3")
+    pygame.mixer.music.play(-1)  # loop indefinitely
+    pygame.mixer.music.set_volume(0.5)
 
     # initial snake position
     x1, y1 = WIDTH / 2, HEIGHT / 2
@@ -250,6 +255,7 @@ def game_loop():
             WINDOW.fill(BLACK)
             message("You Lost! Press Q/ESCAPE-Quit or Space-Play Again", RED)
             display_score(snake_length - 1)
+            pygame.mixer.music.stop()
             pygame.display.update()
 
             for event in pygame.event.get():
@@ -284,6 +290,15 @@ def game_loop():
                     y1_change = SNAKE_BLOCK
                     x1_change = 0
                     direction = "DOWN"
+                elif event.key == pygame.K_p:
+                    paused = not paused
+                    if paused:
+                        pygame.mixer.music.pause()
+                    else:
+                        pygame.mixer.music.unpause()
+
+        if paused:
+            continue
 
         # check if snake hits the wall
         if x1 >= WIDTH or x1 < 0 or y1 >= HEIGHT or y1 < 0:
