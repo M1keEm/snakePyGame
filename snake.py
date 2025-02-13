@@ -219,6 +219,7 @@ def game_loop():
     game_over = False
     game_close = False
     paused = False
+    global current_fps
 
     # background music
     pygame.mixer.music.load("dist/resources/background_music.mp3")
@@ -266,6 +267,7 @@ def game_loop():
                         game_over = True
                         game_close = False
                     if event.key == pygame.K_SPACE:
+                        current_fps = 10
                         game_loop()
                 if event.type == pygame.QUIT:
                     game_over = True
@@ -344,7 +346,6 @@ def game_loop():
                 eat_sound.play()
 
                 # create particles
-                global current_fps
                 current_fps += speed_increment
                 CLOCK.tick(current_fps)
 
