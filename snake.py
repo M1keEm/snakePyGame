@@ -35,29 +35,6 @@ APPLE_IMG = pygame.image.load("resources/apple.png")
 APPLE_IMG = pygame.transform.scale(APPLE_IMG, (20, 20))
 
 
-def main_menu():
-    menu = True
-    while menu:
-        # WINDOW.fill(BLACK)
-        WINDOW.blit(MENU_BACKGROUND, (0, 0))
-        message("Welcome to Snake Game!", WHITE, -50, MENU_FONT)
-        message("Press SPACE to play", WHITE, 0)
-        message("Press Q/ESCAPE to quit", WHITE, 50)
-
-        pygame.display.update()
-
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    game_loop()
-                if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    quit()
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-
-
 class Fruit:
     def __init__(self, snake_block, width, height):
         self.x = None
@@ -100,6 +77,29 @@ class Particle:
     def draw(self):
         if self.lifespan > 0:
             pygame.draw.circle(WINDOW, self.color, (int(self.x), int(self.y)), 1)
+
+
+def main_menu():
+    menu = True
+    while menu:
+        # WINDOW.fill(BLACK)
+        WINDOW.blit(MENU_BACKGROUND, (0, 0))
+        message("Welcome to Snake Game!", WHITE, -50, MENU_FONT)
+        message("Press SPACE to play", WHITE, 0)
+        message("Press Q/ESCAPE to quit", WHITE, 50)
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    game_loop()
+                if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    quit()
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
 
 
 # drawing the snake
@@ -206,8 +206,8 @@ def game_loop():
     snake_length = 1
     snake_list = []
 
-    # create a Fruit object
-    fruit = Fruit(SNAKE_BLOCK, WIDTH, HEIGHT)
+    # create a Fruit object list
+    fruits = [Fruit(SNAKE_BLOCK, WIDTH, HEIGHT) for _ in range(2)]
 
     # eye animation logic
     eye_state = True  # True for open, False for closed
@@ -274,10 +274,9 @@ def game_loop():
         y1 += y1_change
         WINDOW.fill((175, 215, 70))
 
-        # draw food
-        fruit.draw(WINDOW)
-        # pygame.draw.circle(WINDOW, RED, (int(food_x + SNAKE_BLOCK // 2), int(food_y + SNAKE_BLOCK // 2)),
-        #                    SNAKE_BLOCK // 2)
+        # Draw all fruits
+        for fruit in fruits:
+            fruit.draw(WINDOW)
 
         # add snake head to the snake list
         snake_head = [x1, y1]
@@ -296,16 +295,17 @@ def game_loop():
             eye_state = not eye_state  # toggle eye state
             last_blink_time = current_time
 
-        # check if snake eats the food
-        if fruit.is_eaten(snake_head):
-            fruit.reset_position()
-            snake_length += 1
-            eating = True  # start eating animation
-            eating_start_time = pygame.time.get_ticks()
+        # check if snake eats any fruit
+        for fruit in fruits:
+            if fruit.is_eaten(snake_head):
+                fruit.reset_position()
+                snake_length += 1
+                eating = True  # start eating animation
+                eating_start_time = pygame.time.get_ticks()
 
-            # create particles
-            for _ in range(20):  # create 20 particles
-                particles.append(Particle(fruit.x + SNAKE_BLOCK // 2, fruit.y + SNAKE_BLOCK // 2, RED))
+                # create particles
+                for _ in range(20):  # create 20 particles
+                    particles.append(Particle(fruit.x + SNAKE_BLOCK // 2, fruit.y + SNAKE_BLOCK // 2, RED))
 
         # update eating animation
         if eating and current_time - eating_start_time > eating_duration:
