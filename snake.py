@@ -30,6 +30,7 @@ MENU_FONT = pygame.font.SysFont("comicsansms", 50)
 MENU_BACKGROUND = pygame.image.load("resources/menu_background.png")
 MENU_BACKGROUND = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
 
+
 def main_menu():
     menu = True
     while menu:
@@ -54,15 +55,15 @@ def main_menu():
 
 
 # drawing the snake
-def draw_snake(snake_block, snake_list):
+def draw_snake(snake_block, snake_list, eye_state):
     for i, block in enumerate(snake_list):
         pygame.draw.rect(WINDOW, GREEN, [block[0], block[1], snake_block, snake_block])
 
         # draw eyes on the head of the snake
-        if i == len(snake_list) - 1: # check if it's the head
+        if i == len(snake_list) - 1:  # check if it's the head
             head_x, head_y = block[0], block[1]
-            eye_radius = 2 # radius of the eye
-            eye_offset = 3 # distance from the edge of the head
+            eye_radius = 2  # radius of the eye
+            eye_offset = 3  # distance from the edge of the head
 
             # determine the direction of the snake
             if len(snake_list) > 1:
@@ -84,8 +85,18 @@ def draw_snake(snake_block, snake_list):
                 eye1_pos = (head_x + eye_offset, head_y + eye_offset)
                 eye2_pos = (head_x + snake_block - eye_offset, head_y + eye_offset)
 
-            pygame.draw.circle(WINDOW, BLACK, eye1_pos, eye_radius)
-            pygame.draw.circle(WINDOW, BLACK, eye2_pos, eye_radius)
+            # draw the eyes
+            if eye_state:
+                pygame.draw.circle(WINDOW, BLACK, eye1_pos, eye_radius)
+                pygame.draw.circle(WINDOW, BLACK, eye2_pos, eye_radius)
+            else:
+                # draw smaller eyes
+                pygame.draw.circle(WINDOW, BLACK, eye1_pos, eye_radius // 1.5)
+                pygame.draw.circle(WINDOW, BLACK, eye2_pos, eye_radius // 1.5)
+
+            # pygame.draw.circle(WINDOW, BLACK, eye1_pos, eye_radius)
+            # pygame.draw.circle(WINDOW, BLACK, eye2_pos, eye_radius)
+
 
 # display player's score
 def display_score(score):
@@ -104,14 +115,14 @@ def message(msg, color, y_offset=0, font=None):
     for word in words:
         # check if adding the word to the current line will exceed the width of the window
         test_line = current_line + ' ' + word if current_line else word
-        test_width, _ = font.size(test_line) # get the width of the text, ignore the height
+        test_width, _ = font.size(test_line)  # get the width of the text, ignore the height
         if test_width > WIDTH - 40:
             lines.append(current_line)
             current_line = word
         else:
             current_line = test_line
     if current_line:
-        lines.append(current_line) # add the last line
+        lines.append(current_line)  # add the last line
 
     # calculate the y position of the text and center it
     total_height = len(lines) * font.get_height()
@@ -140,6 +151,11 @@ def game_loop():
     # food position
     food_x = round(random.randrange(0, WIDTH - 10) / 10.0) * 10.0
     food_y = round(random.randrange(0, HEIGHT - 10) / 10.0) * 10.0
+
+    # eye animation logic
+    eye_state = True  # True for open, False for closed
+    last_blink_time = pygame.time.get_ticks()
+    blink_interval = random.randint(500, 1500)  # Random interval between 300ms and 800ms
 
     while not game_over:
         while game_close:
@@ -200,8 +216,14 @@ def game_loop():
             if block == snake_head:
                 game_close = True
 
+        # update eye animation
+        current_time = pygame.time.get_ticks()
+        if current_time - last_blink_time > blink_interval:
+            eye_state = not eye_state  # toggle eye state
+            last_blink_time = current_time
+
         # draw the snake
-        draw_snake(SNAKE_BLOCK, snake_list)
+        draw_snake(SNAKE_BLOCK, snake_list, eye_state)
         # display current score
         display_score(snake_length - 1)
         pygame.display.update()
