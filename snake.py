@@ -25,6 +25,32 @@ SNAKE_BLOCK = 10  # snake moves 10 pixels at a time
 # font style
 FONT_STYLE = pygame.font.SysFont("bahnschrift", 40)
 SCORE_FONT = pygame.font.SysFont("comicsans", 35)
+MENU_FONT = pygame.font.SysFont("comicsansms", 50)
+
+MENU_BACKGROUND = pygame.image.load("resources/menu_background.png")
+MENU_BACKGROUND = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
+
+def main_menu():
+    menu = True
+    while menu:
+        # WINDOW.fill(BLACK)
+        WINDOW.blit(MENU_BACKGROUND, (0, 0))
+        message("Welcome to Snake Game!", WHITE, -50, MENU_FONT)
+        message("Press SPACE to play", WHITE)
+        message("Press Q/ESCAPE to quit", WHITE, 50)
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    game_loop()
+                if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    quit()
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
 
 
 # drawing the snake
@@ -38,9 +64,11 @@ def display_score(score):
     value = SCORE_FONT.render("Score: " + str(score), True, YELLOW)
     WINDOW.blit(value, [0, 0])  # draw the score on top of the window
 
-def message(msg, color):
+
+def message(msg, color, y_offset=0, font=FONT_STYLE):
     mesg = FONT_STYLE.render(msg, True, color)
-    WINDOW.blit(mesg, [10, HEIGHT / 2.5])
+    WINDOW.blit(mesg, [10, HEIGHT / 2.5 + y_offset])
+
 
 # main game loop
 def game_loop():
@@ -62,7 +90,7 @@ def game_loop():
     while not game_over:
         while game_close:
             WINDOW.fill(BLACK)
-            message("You Lost! Press Q-Quit or Space-Play Again", RED)
+            message("You Lost! Press Q/ESCAPE-Quit or Space-Play Again", RED)
             display_score(snake_length - 1)
             pygame.display.update()
 
@@ -77,6 +105,7 @@ def game_loop():
                     game_over = True
                     game_close = False
 
+        # check for keyboard input and other events (quit)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
@@ -135,4 +164,5 @@ def game_loop():
     quit()
 
 
-game_loop()
+# start the game with the main menu
+main_menu()
