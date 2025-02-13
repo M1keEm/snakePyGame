@@ -121,10 +121,14 @@ def game_loop():
         draw_snake(SNAKE_BLOCK, snake_list)
         # display current score
         display_score(snake_length - 1)
-
-
-
         pygame.display.update()
+
+        # check if snake eats the food
+        if x1 == food_x and y1 == food_y:
+            food_x = round(random.randrange(0, WIDTH - 10) / 10.0) * 10.0
+            food_y = round(random.randrange(0, HEIGHT - 10) / 10.0) * 10.0
+            snake_length += 1
+
         CLOCK.tick(fps)
 
     pygame.quit()
