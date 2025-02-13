@@ -21,7 +21,8 @@ pygame.display.set_caption("Snake Game")
 
 # clock - game speed
 CLOCK = pygame.time.Clock()
-fps = 10
+current_fps = 10
+speed_increment = 1
 
 # font style
 FONT_STYLE = pygame.font.SysFont("bahnschrift", 40)
@@ -218,10 +219,11 @@ def game_loop():
     game_over = False
     game_close = False
     paused = False
+
     # background music
     pygame.mixer.music.load("resources/background_music.mp3")
     pygame.mixer.music.play(-1)  # loop indefinitely
-    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.set_volume(0.0)
 
     # initial snake position
     x1, y1 = WIDTH / 2, HEIGHT / 2
@@ -342,6 +344,11 @@ def game_loop():
                 eat_sound.play()
 
                 # create particles
+                global current_fps
+                current_fps += speed_increment
+                CLOCK.tick(current_fps)
+
+                pygame.mixer.music.set_volume(min(1.0, pygame.mixer.music.get_volume() + 0.05))  # Increase volume slightly
                 for _ in range(20):  # create 20 particles
                     particles.append(Particle(fruit.x + SNAKE_BLOCK // 2, fruit.y + SNAKE_BLOCK // 2, RED))
 
@@ -362,7 +369,7 @@ def game_loop():
         display_score(snake_length - 1)
         pygame.display.update()
 
-        CLOCK.tick(fps)
+        CLOCK.tick(current_fps)
 
     pygame.quit()
     quit()
