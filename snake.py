@@ -1,5 +1,6 @@
 import random
 import pygame
+from collections import deque
 
 pygame.init()
 
@@ -98,7 +99,9 @@ class Particle:
         if self.lifespan > 0:
             pygame.draw.circle(WINDOW, self.color, (int(self.x), int(self.y)), 1)
 
+
 eat_sound = pygame.mixer.Sound("dist/resources/eat_sound.wav")
+
 
 def main_menu():
     menu = True
@@ -253,6 +256,9 @@ def game_loop():
     # particles system
     particles = []
 
+    # direction queue to prevent the snake from turning back on itself
+    direction_queue = deque()
+
     while not game_over:
         while game_close:
             WINDOW.fill(BLACK)
@@ -262,6 +268,9 @@ def game_loop():
             pygame.display.update()
 
             for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    game_over = True
+                    game_close = False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
                         game_over = True
@@ -269,9 +278,6 @@ def game_loop():
                     if event.key == pygame.K_SPACE:
                         current_fps = 10
                         game_loop()
-                if event.type == pygame.QUIT:
-                    game_over = True
-                    game_close = False
 
         # check for keyboard input and other events (quit)
         for event in pygame.event.get():
@@ -279,21 +285,17 @@ def game_loop():
                 game_over = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT and direction != "RIGHT":
-                    x1_change = -SNAKE_BLOCK
-                    y1_change = 0
-                    direction = "LEFT"
+                    direction_queue.append("LEFT")
                 elif event.key == pygame.K_RIGHT and direction != "LEFT":
-                    x1_change = SNAKE_BLOCK
-                    y1_change = 0
-                    direction = "RIGHT"
+                    direction_queue.append("RIGHT")
                 elif event.key == pygame.K_UP and direction != "DOWN":
                     y1_change = -SNAKE_BLOCK
                     x1_change = 0
-                    direction = "UP"
+                    direction_queue.append("UP")
                 elif event.key == pygame.K_DOWN and direction != "UP":
                     y1_change = SNAKE_BLOCK
                     x1_change = 0
-                    direction = "DOWN"
+                    direction_queue.append("DOWN")
                 elif event.key == pygame.K_p:
                     paused = not paused
                     if paused:
@@ -303,6 +305,26 @@ def game_loop():
 
         if paused:
             continue
+
+        # process the direction queue
+        if direction_queue:
+            new_direction = direction_queue.popleft()
+            if new_direction == "LEFT" and direction != "RIGHT":
+                x1_change = -SNAKE_BLOCK
+                y1_change = 0
+                direction = "LEFT"
+            if new_direction == "RIGHT" and direction != "LEFT":
+                x1_change = SNAKE_BLOCK
+                y1_change = 0
+                direction = "RIGHT"
+            if new_direction == "UP" and direction != "DOWN":
+                y1_change = -SNAKE_BLOCK
+                x1_change = 0
+                direction = "UP"
+            if new_direction == "DOWN" and direction != "UP":
+                y1_change = SNAKE_BLOCK
+                x1_change = 0
+                direction = "DOWN"
 
         # check if snake hits the wall
         if x1 >= WIDTH or x1 < 0 or y1 >= HEIGHT or y1 < 0:
@@ -349,7 +371,8 @@ def game_loop():
                 current_fps += speed_increment
                 CLOCK.tick(current_fps)
 
-                pygame.mixer.music.set_volume(min(1.0, pygame.mixer.music.get_volume() + 0.05))  # Increase volume slightly
+                pygame.mixer.music.set_volume(
+                    min(1.0, pygame.mixer.music.get_volume() + 0.05))  # Increase volume slightly
                 for _ in range(20):  # create 20 particles
                     particles.append(Particle(fruit.x + SNAKE_BLOCK // 2, fruit.y + SNAKE_BLOCK // 2, RED))
 
