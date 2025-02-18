@@ -173,17 +173,20 @@ def draw_snake(snake_block, snake_list, eye_state, direction, eating):
 
         elif i == 0:  # Tail
             segment_type = "TAIL"
-            segment_image = TAIL_UP
+            next_block = snake_list[i + 1]
 
-            # Rotate the tail image based on the direction
-            if direction == "RIGHT":
-                segment_image = pygame.transform.rotate(segment_image, 180)
-            elif direction == "LEFT":
-                segment_image = pygame.transform.rotate(segment_image, 0)
-            elif direction == "UP":
-                segment_image = pygame.transform.rotate(segment_image, 270)
-            elif direction == "DOWN":
-                segment_image = pygame.transform.rotate(segment_image, 90)
+            # Determine the direction of the tail based on the next segment
+            dx = next_block[0] - block[0]
+            dy = next_block[1] - block[1]
+
+            if dx == snake_block:
+                segment_image = pygame.transform.rotate(TAIL_UP, 180)
+            elif dx == -snake_block:
+                segment_image = TAIL_UP
+            elif dy == snake_block:
+                segment_image = pygame.transform.rotate(TAIL_UP, 90)
+            elif dy == -snake_block:
+                segment_image = pygame.transform.rotate(TAIL_UP, 270)
 
         else:  # Body or turning segment
             prev_block = snake_list[i - 1]
@@ -244,6 +247,7 @@ def draw_snake(snake_block, snake_list, eye_state, direction, eating):
             else:
                 pygame.draw.circle(WINDOW, BLACK, eye1_pos, eye_radius // 1.5)
                 pygame.draw.circle(WINDOW, BLACK, eye2_pos, eye_radius // 1.5)
+
 # display player's score
 def display_score(score):
     value = SCORE_FONT.render("Score: " + str(score), True, YELLOW)
