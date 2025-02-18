@@ -123,6 +123,20 @@ class Particle:
 
 eat_sound = pygame.mixer.Sound("dist/resources/eat_sound.wav")
 
+def load_high_score():
+    """Load the high score from a file. If the file doesn't exist, return 0."""
+    try:
+        with open("highscore.txt", "r") as file:
+            return int(file.read())
+    except FileNotFoundError:
+        return 0
+
+
+def save_high_score(score):
+    """Save the high score to a file."""
+    with open("highscore.txt", "w") as file:
+        file.write(str(score))
+
 
 def main_menu():
     menu = True
@@ -253,8 +267,10 @@ def draw_snake(snake_block, snake_list, nose_state, direction, eating):
 
 # display player's score
 def display_score(score):
+    # Load the high score
+    high_score = load_high_score()
     # Render the score text with an outline and shadow
-    text = "Score: " + str(score)
+    text = f"Score: {score} High Score: {high_score}"
     font_size = 40
     text_color = WHITE  # Main text color
     outline_color = BLACK  # Outline color
@@ -329,6 +345,9 @@ def game_loop():
     game_close = False
     paused = False
     global current_fps
+
+    # Load high score
+    high_score = load_high_score()
 
     # background music
     pygame.mixer.music.load("dist/resources/background_music.mp3")
@@ -498,6 +517,9 @@ def game_loop():
         pygame.display.update()
 
         CLOCK.tick(current_fps)
+    current_score = snake_length - 1
+    if current_score > high_score:
+        save_high_score(current_score)
 
     pygame.quit()
     quit()
