@@ -37,18 +37,24 @@ GAME_BACKGROUND = pygame.image.load("dist/resources/background_snake.png")
 APPLE_IMG = pygame.image.load("dist/resources/apple.png")
 APPLE_IMG = pygame.transform.scale(APPLE_IMG, (20, 20))
 
+SPRITE_SHEET = pygame.image.load("dist/resources/sprite_sheet.png")
+def get_sprite(sheet, x, y, width, height):
+    image = pygame.Surface((width, height), pygame.SRCALPHA)
+    image.blit(sheet, (0, 0), (x, y, width, height))
+    return image
+
+
 # Load snake skin images
-BODY_RIGHT_TOP = pygame.image.load("dist/resources/body_right_top.png")
+TAIL_UP = pygame.transform.rotate(get_sprite(SPRITE_SHEET, 40, 0, 20, 20), 90)
+BODY_VERTICAL = get_sprite(SPRITE_SHEET, 20, 0, 20, 20)
+BODY_RIGHT_TOP = get_sprite(SPRITE_SHEET, 0, 0, 20, 20)
+HEAD_DOWN_TONGUE_HIDDEN = pygame.transform.rotate(get_sprite(SPRITE_SHEET, 0, 20, 20, 20), 90)
+HEAD_DOWN_TONGUE_MID = pygame.transform.rotate(get_sprite(SPRITE_SHEET, 20, 20, 20, 20), 90)
+HEAD_DOWN_TONGUE_OUT = pygame.transform.rotate(get_sprite(SPRITE_SHEET, 40, 20, 20, 20), 90)
+
 BODY_RIGHT_BOTTOM = pygame.transform.rotate(BODY_RIGHT_TOP, 270)
 BODY_LEFT_BOTTOM = pygame.transform.rotate(BODY_RIGHT_BOTTOM, 270)
 BODY_LEFT_TOP = pygame.transform.rotate(BODY_RIGHT_BOTTOM, 180)
-
-HEAD_DOWN_TONGUE_HIDDEN = pygame.transform.rotate(pygame.image.load("dist/resources/head_down_tongue_hidden.png"), 90)
-HEAD_DOWN_TONGUE_MID = pygame.transform.rotate(pygame.image.load("dist/resources/head_down_tongue_mid.png"), 90)
-HEAD_DOWN_TONGUE_OUT = pygame.transform.rotate(pygame.image.load("dist/resources/head_down_tongue_out.png"), 90)
-
-TAIL_UP = pygame.transform.rotate(pygame.image.load("dist/resources/tail_up.png"), 90)
-BODY_VERTICAL = pygame.image.load("dist/resources/body_vertical.png")
 BODY_HORIZONTAL = pygame.transform.rotate(BODY_VERTICAL, 90)
 
 
