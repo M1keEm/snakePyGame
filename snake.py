@@ -27,7 +27,7 @@ speed_increment = 1
 
 # font style
 FONT_STYLE = pygame.font.SysFont("bahnschrift", 40)
-SCORE_FONT = pygame.font.SysFont("comicsans", 35)
+SCORE_FONT = pygame.font.SysFont("comicsansms", 35)
 MENU_FONT = pygame.font.SysFont("comicsansms", 50)
 
 MENU_BACKGROUND = pygame.image.load("dist/resources/menu_background.png")
@@ -35,7 +35,7 @@ MENU_BACKGROUND = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
 GAME_BACKGROUND = pygame.image.load("dist/resources/background_snake.png")
 
 APPLE_IMG = pygame.image.load("dist/resources/apple.png")
-APPLE_IMG = pygame.transform.scale(APPLE_IMG, (20, 20))
+APPLE_IMG_SCALED = pygame.transform.scale(APPLE_IMG, (20, 20))
 
 SPRITE_SHEET = pygame.image.load("dist/resources/sprite_sheet.png")
 def get_sprite(sheet, x, y, width, height):
@@ -253,8 +253,23 @@ def draw_snake(snake_block, snake_list, nose_state, direction, eating):
 
 # display player's score
 def display_score(score):
-    value = SCORE_FONT.render("Score: " + str(score), True, BLACK)
-    WINDOW.blit(value, [0, 0])  # draw the score on top of the window
+    # Render the score text
+    score_text = SCORE_FONT.render("Score: " + str(score), True, WHITE)
+
+    # Get the width and height of the score text
+    score_width = score_text.get_width()
+    score_height = score_text.get_height()
+
+    # Draw the score text in the top-left corner
+    WINDOW.blit(score_text, [10, 10])  # Adjusted position for better spacing
+
+    # Scale the apple icon to match the height of the text
+    apple_icon_scaled = pygame.transform.scale(APPLE_IMG, (score_height, score_height))
+
+    # Draw the apple icon next to the score text
+    apple_icon_x = 10 + score_width + 10  # 10 pixels padding after the score text
+    apple_icon_y = 10  # Align with the score text vertically
+    WINDOW.blit(apple_icon_scaled, (apple_icon_x, apple_icon_y))
 
 
 def message(msg, color, y_offset=0, font=None):
