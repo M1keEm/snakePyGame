@@ -141,7 +141,7 @@ def main_menu():
 
 
 # drawing the snake
-def draw_snake(snake_block, snake_list, eye_state, direction, eating):
+def draw_snake(snake_block, snake_list, nose_state, direction, eating):
     for i, block in enumerate(snake_list):
         segment_type = None
         segment_image = None
@@ -229,28 +229,28 @@ def draw_snake(snake_block, snake_list, eye_state, direction, eating):
         # Draw eyes on the head (if applicable)
         if segment_type == "HEAD":
             head_x, head_y = block[0], block[1]
-            eye_radius = 4
-            eye_offset = 5
+            nose_radius = 1
+            nose_offset = 8
 
             if direction == "RIGHT":
-                eye1_pos = (head_x + snake_block - eye_offset, head_y + eye_offset)
-                eye2_pos = (head_x + snake_block - eye_offset, head_y + snake_block - eye_offset)
+                nose1_pos = (head_x + snake_block - nose_offset, head_y + nose_offset)
+                nose2_pos = (head_x + snake_block - nose_offset, head_y + snake_block - nose_offset)
             elif direction == "LEFT":
-                eye1_pos = (head_x + eye_offset, head_y + eye_offset)
-                eye2_pos = (head_x + eye_offset, head_y + snake_block - eye_offset)
+                nose1_pos = (head_x + nose_offset, head_y + nose_offset)
+                nose2_pos = (head_x + nose_offset, head_y + snake_block - nose_offset)
             elif direction == "DOWN":
-                eye1_pos = (head_x + eye_offset, head_y + snake_block - eye_offset)
-                eye2_pos = (head_x + snake_block - eye_offset, head_y + snake_block - eye_offset)
+                nose1_pos = (head_x + nose_offset, head_y + snake_block - nose_offset)
+                nose2_pos = (head_x + snake_block - nose_offset, head_y + snake_block - nose_offset)
             elif direction == "UP":
-                eye1_pos = (head_x + eye_offset, head_y + eye_offset)
-                eye2_pos = (head_x + snake_block - eye_offset, head_y + eye_offset)
+                nose1_pos = (head_x + nose_offset, head_y + nose_offset)
+                nose2_pos = (head_x + snake_block - nose_offset, head_y + nose_offset)
 
-            if eye_state:
-                pygame.draw.circle(WINDOW, BLACK, eye1_pos, eye_radius)
-                pygame.draw.circle(WINDOW, BLACK, eye2_pos, eye_radius)
+            if nose_state:
+                pygame.draw.circle(WINDOW, BLACK, nose1_pos, nose_radius)
+                pygame.draw.circle(WINDOW, BLACK, nose2_pos, nose_radius)
             else:
-                pygame.draw.circle(WINDOW, BLACK, eye1_pos, eye_radius // 1.5)
-                pygame.draw.circle(WINDOW, BLACK, eye2_pos, eye_radius // 1.5)
+                pygame.draw.circle(WINDOW, BLACK, nose1_pos, nose_radius // 1.5)
+                pygame.draw.circle(WINDOW, BLACK, nose2_pos, nose_radius // 1.5)
 
 
 # display player's score
@@ -311,7 +311,7 @@ def game_loop():
     snake_list = []
 
     # create a Fruit object list
-    fruits = [Fruit(SNAKE_BLOCK, WIDTH, HEIGHT) for _ in range(10)]
+    fruits = [Fruit(SNAKE_BLOCK, WIDTH, HEIGHT) for _ in range(2)]
 
     # eye animation logic
     eye_state = True  # True for open, False for closed
@@ -446,8 +446,9 @@ def game_loop():
 
                 pygame.mixer.music.set_volume(
                     min(1.0, pygame.mixer.music.get_volume() + 0.05))  # Increase volume slightly
-                for _ in range(20):  # create 20 particles
-                    particles.append(Particle(fruit.x + SNAKE_BLOCK // 2, fruit.y + SNAKE_BLOCK // 2, RED))
+                if(snake_length > 1):
+                    for _ in range(20):  # create 20 particles
+                        particles.append(Particle(fruit.x + SNAKE_BLOCK // 2, fruit.y + SNAKE_BLOCK // 2, RED))
 
         # update eating animation
         if eating and current_time - eating_start_time > eating_duration:
