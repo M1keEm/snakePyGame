@@ -346,7 +346,7 @@ def game_loop():
     paused = False
     global current_fps
 
-    # Load high score
+    # Load high score at the start of the game
     high_score = load_high_score()
 
     # background music
@@ -386,6 +386,12 @@ def game_loop():
 
     while not game_over:
         while game_close:
+            # Save high score immediately when the game ends
+            current_score = snake_length - 1
+            if current_score > high_score:
+                high_score = current_score
+                save_high_score(high_score)
+
             WINDOW.fill(BLACK)
             message("You Lost! Press Q/ESCAPE-Quit or Space-Play Again", RED)
             display_score(snake_length - 1)
@@ -401,6 +407,8 @@ def game_loop():
                         game_over = True
                         game_close = False
                     if event.key == pygame.K_SPACE:
+                        # Reload high score when restarting the game
+                        high_score = load_high_score()
                         current_fps = 10
                         game_loop()
 
@@ -517,9 +525,6 @@ def game_loop():
         pygame.display.update()
 
         CLOCK.tick(current_fps)
-    current_score = snake_length - 1
-    if current_score > high_score:
-        save_high_score(current_score)
 
     pygame.quit()
     quit()
