@@ -22,7 +22,7 @@ pygame.display.set_caption("Snake Game")
 
 # clock - game speed
 CLOCK = pygame.time.Clock()
-current_fps = 2
+current_fps = 10
 speed_increment = 1
 
 # font style
@@ -37,8 +37,8 @@ APPLE_IMG = pygame.image.load("dist/resources/apple.png")
 APPLE_IMG = pygame.transform.scale(APPLE_IMG, (20, 20))
 
 # Load snake skin images
-BODY_RIGHT_BOTTOM = pygame.image.load("dist/resources/body_right_top.png")
-BODY_RIGHT_TOP =  pygame.transform.rotate(BODY_RIGHT_BOTTOM, 90)
+BODY_RIGHT_TOP = pygame.image.load("dist/resources/body_right_top.png")
+BODY_RIGHT_BOTTOM = pygame.transform.rotate(BODY_RIGHT_TOP, 270)
 BODY_LEFT_BOTTOM = pygame.transform.rotate(BODY_RIGHT_BOTTOM, 270)
 BODY_LEFT_TOP = pygame.transform.rotate(BODY_RIGHT_BOTTOM, 180)
 
@@ -205,18 +205,22 @@ def draw_snake(snake_block, snake_list, eye_state, direction, eating):
                 else:  # Horizontal
                     segment_image = BODY_HORIZONTAL
             else:  # Turning segment
-                if (prev_dx == -snake_block and next_dy == -snake_block) or (prev_dy == -snake_block and next_dx == -snake_block):
-                    segment_type = "TURN_LEFT_TOP"
-                    segment_image = BODY_LEFT_TOP
-                elif (prev_dx == -snake_block and next_dy == snake_block) or (prev_dy == snake_block and next_dx == -snake_block):
-                    segment_type = "TURN_LEFT_BOTTOM"
-                    segment_image = BODY_LEFT_BOTTOM
-                elif (prev_dx == snake_block and next_dy == -snake_block) or (prev_dy == -snake_block and next_dx == snake_block):
-                    segment_type = "TURN_RIGHT_TOP"
-                    segment_image = BODY_RIGHT_TOP
-                elif (prev_dx == snake_block and next_dy == snake_block) or (prev_dy == snake_block and next_dx == snake_block):
+                if (prev_dx == snake_block and next_dy == -snake_block) or (
+                        prev_dy == snake_block and next_dx == -snake_block):
                     segment_type = "TURN_RIGHT_BOTTOM"
                     segment_image = BODY_RIGHT_BOTTOM
+                elif (prev_dx == -snake_block and next_dy == snake_block) or (
+                        prev_dy == -snake_block and next_dx == snake_block):
+                    segment_type = "TURN_LEFT_TOP"
+                    segment_image = BODY_LEFT_TOP
+                elif (prev_dx == -snake_block and next_dy == -snake_block) or (
+                        prev_dy == snake_block and next_dx == snake_block):
+                    segment_type = "TURN_LEFT_BOTTOM"
+                    segment_image = BODY_LEFT_BOTTOM
+                elif (prev_dx == snake_block and next_dy == snake_block) or (
+                        prev_dy == -snake_block and next_dx == -snake_block):
+                    segment_type = "TURN_RIGHT_TOP"
+                    segment_image = BODY_RIGHT_TOP
 
         # Draw the segment
         if segment_image:
@@ -247,6 +251,7 @@ def draw_snake(snake_block, snake_list, eye_state, direction, eating):
             else:
                 pygame.draw.circle(WINDOW, BLACK, eye1_pos, eye_radius // 1.5)
                 pygame.draw.circle(WINDOW, BLACK, eye2_pos, eye_radius // 1.5)
+
 
 # display player's score
 def display_score(score):
