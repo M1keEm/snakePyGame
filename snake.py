@@ -2,6 +2,20 @@ import random
 import pygame
 from collections import deque
 
+import os
+import sys
+
+def resource_path(relative_path):
+    """ Get the absolute path to the resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+
 pygame.init()
 
 # Colors
@@ -30,14 +44,18 @@ FONT_STYLE = pygame.font.SysFont("bahnschrift", 40)
 SCORE_FONT = pygame.font.SysFont("comicsansms", 35)
 MENU_FONT = pygame.font.SysFont("comicsansms", 50)
 
-MENU_BACKGROUND = pygame.image.load("dist/resources/menu_background.png")
+MENU_BACKGROUND = pygame.image.load(resource_path("dist/resources/menu_background.png"))
 MENU_BACKGROUND = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
-GAME_BACKGROUND = pygame.image.load("dist/resources/background_snake.png")
+GAME_BACKGROUND = pygame.image.load(resource_path("dist/resources/background_snake.png"))
 
-APPLE_IMG = pygame.image.load("dist/resources/apple.png")
+APPLE_IMG = pygame.image.load(resource_path("dist/resources/apple.png"))
 APPLE_IMG_SCALED = pygame.transform.scale(APPLE_IMG, (20, 20))
 
-SPRITE_SHEET = pygame.image.load("dist/resources/sprite_sheet.png")
+SPRITE_SHEET = pygame.image.load(resource_path("dist/resources/sprite_sheet.png"))
+
+eat_sound = pygame.mixer.Sound(resource_path("dist/resources/eat_sound.wav"))
+pygame.mixer.music.load(resource_path("dist/resources/background_music.mp3"))
+
 def get_sprite(sheet, x, y, width, height):
     image = pygame.Surface((width, height), pygame.SRCALPHA)
     image.blit(sheet, (0, 0), (x, y, width, height))
@@ -65,7 +83,7 @@ class Fruit:
         self.snake_block = snake_block
         self.width = width
         self.height = height
-        self.image = pygame.image.load("dist/resources/apple.png").convert_alpha()
+        self.image = pygame.image.load(resource_path("dist/resources/apple.png")).convert_alpha()
         self.image = pygame.transform.scale(self.image, (snake_block, snake_block))
         self.reset_position()
 
@@ -121,7 +139,7 @@ class Particle:
             pygame.draw.circle(WINDOW, self.color, (int(self.x), int(self.y)), 1)
 
 
-eat_sound = pygame.mixer.Sound("dist/resources/eat_sound.wav")
+# eat_sound = pygame.mixer.Sound("dist/resources/eat_sound.wav")
 
 def load_high_score():
     """Load the high score from a file. If the file doesn't exist, return 0."""
@@ -141,7 +159,6 @@ def save_high_score(score):
 def main_menu():
     menu = True
     while menu:
-        # WINDOW.fill(BLACK)
         WINDOW.blit(MENU_BACKGROUND, (0, 0))
         message("Welcome to Snake Game!", WHITE, -50, MENU_FONT)
         message("Press SPACE to play", WHITE, 0)
@@ -271,7 +288,6 @@ def display_score(score):
     high_score = load_high_score()
     # Render the score text with an outline and shadow
     text = f"Score: {score} High Score: {high_score}"
-    font_size = 40
     text_color = WHITE  # Main text color
     outline_color = BLACK  # Outline color
     shadow_color = (50, 50, 50)  # Shadow color (dark gray)
@@ -350,7 +366,6 @@ def game_loop():
     high_score = load_high_score()
 
     # background music
-    pygame.mixer.music.load("dist/resources/background_music.mp3")
     pygame.mixer.music.play(-1)  # loop indefinitely
     pygame.mixer.music.set_volume(0.01)
 
