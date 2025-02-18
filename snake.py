@@ -32,6 +32,7 @@ MENU_FONT = pygame.font.SysFont("comicsansms", 50)
 
 MENU_BACKGROUND = pygame.image.load("dist/resources/menu_background.png")
 MENU_BACKGROUND = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
+GAME_BACKGROUND = pygame.image.load("dist/resources/background_snake.png")
 
 APPLE_IMG = pygame.image.load("dist/resources/apple.png")
 APPLE_IMG = pygame.transform.scale(APPLE_IMG, (20, 20))
@@ -406,7 +407,7 @@ def game_loop():
         # update snake position
         x1 += x1_change
         y1 += y1_change
-        WINDOW.fill((BLUE))
+        WINDOW.blit(GAME_BACKGROUND, (0, 0))
 
         # Draw all fruits
         for fruit in fruits:
