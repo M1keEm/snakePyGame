@@ -144,18 +144,16 @@ def main_menu():
 # drawing the snake
 def draw_snake(snake_block, snake_list, nose_state, direction, eating):
     for i, block in enumerate(snake_list):
-        segment_type = None
         segment_image = None
 
         # Determine the segment type
         if i == len(snake_list) - 1:  # Head
-            segment_type = "HEAD"
             if eating:
                 # Use different head images for eating animation
                 current_time = pygame.time.get_ticks()
-                if current_time % 300 < 100:
+                if current_time % 400 < 100:
                     segment_image = HEAD_DOWN_TONGUE_HIDDEN
-                elif current_time % 300 < 200:
+                elif current_time % 400 < 200:
                     segment_image = HEAD_DOWN_TONGUE_MID
                 else:
                     segment_image = HEAD_DOWN_TONGUE_OUT
@@ -172,11 +170,9 @@ def draw_snake(snake_block, snake_list, nose_state, direction, eating):
             elif direction == "DOWN":
                 segment_image = pygame.transform.rotate(segment_image, 270)
 
-        elif i == 0:  # Tail
-            segment_type = "TAIL"
+        elif i == 0:
             next_block = snake_list[i + 1]
 
-            # Determine the direction of the tail based on the next segment
             dx = next_block[0] - block[0]
             dy = next_block[1] - block[1]
 
@@ -200,7 +196,6 @@ def draw_snake(snake_block, snake_list, nose_state, direction, eating):
             next_dy = next_block[1] - block[1]
 
             if prev_dx == next_dx and prev_dy == next_dy:  # Straight segment
-                segment_type = "BODY"
                 if prev_dx == 0:  # Vertical
                     segment_image = BODY_VERTICAL
                 else:  # Horizontal
@@ -208,19 +203,15 @@ def draw_snake(snake_block, snake_list, nose_state, direction, eating):
             else:  # Turning segment
                 if (prev_dx == snake_block and next_dy == -snake_block) or (
                         prev_dy == snake_block and next_dx == -snake_block):
-                    segment_type = "TURN_RIGHT_BOTTOM"
                     segment_image = BODY_RIGHT_BOTTOM
                 elif (prev_dx == -snake_block and next_dy == snake_block) or (
                         prev_dy == -snake_block and next_dx == snake_block):
-                    segment_type = "TURN_LEFT_TOP"
                     segment_image = BODY_LEFT_TOP
                 elif (prev_dx == -snake_block and next_dy == -snake_block) or (
                         prev_dy == snake_block and next_dx == snake_block):
-                    segment_type = "TURN_LEFT_BOTTOM"
                     segment_image = BODY_LEFT_BOTTOM
                 elif (prev_dx == snake_block and next_dy == snake_block) or (
                         prev_dy == -snake_block and next_dx == -snake_block):
-                    segment_type = "TURN_RIGHT_TOP"
                     segment_image = BODY_RIGHT_TOP
 
         # Draw the segment
@@ -228,7 +219,7 @@ def draw_snake(snake_block, snake_list, nose_state, direction, eating):
             WINDOW.blit(segment_image, (block[0], block[1]))
 
         # Draw eyes on the head (if applicable)
-        if segment_type == "HEAD":
+        if i == len(snake_list) - 1:
             head_x, head_y = block[0], block[1]
             nose_radius = 1
             nose_offset = 8
@@ -256,7 +247,7 @@ def draw_snake(snake_block, snake_list, nose_state, direction, eating):
 
 # display player's score
 def display_score(score):
-    value = SCORE_FONT.render("Score: " + str(score), True, YELLOW)
+    value = SCORE_FONT.render("Score: " + str(score), True, BLACK)
     WINDOW.blit(value, [0, 0])  # draw the score on top of the window
 
 
@@ -301,7 +292,7 @@ def game_loop():
     # background music
     pygame.mixer.music.load("dist/resources/background_music.mp3")
     pygame.mixer.music.play(-1)  # loop indefinitely
-    pygame.mixer.music.set_volume(0.0)
+    pygame.mixer.music.set_volume(0.01)
 
     # initial snake position
     x1, y1 = WIDTH / 2, HEIGHT / 2
@@ -314,10 +305,10 @@ def game_loop():
     # create a Fruit object list
     fruits = [Fruit(SNAKE_BLOCK, WIDTH, HEIGHT) for _ in range(2)]
 
-    # eye animation logic
-    eye_state = True  # True for open, False for closed
-    last_blink_time = pygame.time.get_ticks()
-    blink_interval = random.randint(500, 1500)  # Random interval between 300ms and 800ms
+    # nose animation logic
+    nose_state = True  # True for open, False for closed
+    last_breath_time = pygame.time.get_ticks()
+    blink_interval = random.randint(700, 2000)  # Random interval between 300ms and 800ms
 
     # track the snake's direction
     direction = "RIGHT"  # initial direction
@@ -325,7 +316,7 @@ def game_loop():
     # eating animation logic
     eating = False  # True if the snake is eating
     eating_start_time = 0  # time when the snake starts eating
-    eating_duration = 400  # duration of the eating animation in milliseconds
+    eating_duration = 700  # duration of the eating animation in milliseconds
 
     # particles system
     particles = []
@@ -363,12 +354,8 @@ def game_loop():
                 elif event.key == pygame.K_RIGHT and direction != "LEFT":
                     direction_queue.append("RIGHT")
                 elif event.key == pygame.K_UP and direction != "DOWN":
-                    y1_change = -SNAKE_BLOCK
-                    x1_change = 0
                     direction_queue.append("UP")
                 elif event.key == pygame.K_DOWN and direction != "UP":
-                    y1_change = SNAKE_BLOCK
-                    x1_change = 0
                     direction_queue.append("DOWN")
                 elif event.key == pygame.K_p:
                     paused = not paused
@@ -426,9 +413,9 @@ def game_loop():
 
         # update eye animation
         current_time = pygame.time.get_ticks()
-        if current_time - last_blink_time > blink_interval:
-            eye_state = not eye_state  # toggle eye state
-            last_blink_time = current_time
+        if current_time - last_breath_time > blink_interval:
+            nose_state = not nose_state  # toggle nose state
+            last_breath_time = current_time
 
         # check if snake eats any fruit
         for fruit in fruits:
@@ -446,8 +433,9 @@ def game_loop():
                 CLOCK.tick(current_fps)
 
                 pygame.mixer.music.set_volume(
-                    min(1.0, pygame.mixer.music.get_volume() + 0.05))  # Increase volume slightly
-                if(snake_length > 1):
+                    min(1.0,
+                        max(0.1, pygame.mixer.music.get_volume() + 0.05)))  # Increase volume slightly, max volume 1.0
+                if snake_length > 1:
                     for _ in range(20):  # create 20 particles
                         particles.append(Particle(fruit.x + SNAKE_BLOCK // 2, fruit.y + SNAKE_BLOCK // 2, RED))
 
@@ -463,7 +451,7 @@ def game_loop():
                 particles.remove(particle)
 
         # draw the snake
-        draw_snake(SNAKE_BLOCK, snake_list, eye_state, direction, eating)
+        draw_snake(SNAKE_BLOCK, snake_list, nose_state, direction, eating)
         # display current score
         display_score(snake_length - 1)
         pygame.display.update()
