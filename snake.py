@@ -12,7 +12,7 @@ GREEN = (0, 255, 0)
 YELLOW = (255, 255, 102)
 BLUE = (50, 153, 213)
 
-SNAKE_BLOCK = 20  # snake moves 10 pixels at a time
+SNAKE_BLOCK = 20  # snake moves 20 pixels at a time
 CELL_NUMBER = 40
 
 # display settings
@@ -22,7 +22,7 @@ pygame.display.set_caption("Snake Game")
 
 # clock - game speed
 CLOCK = pygame.time.Clock()
-current_fps = 10
+current_fps = 2
 speed_increment = 1
 
 # font style
@@ -35,6 +35,20 @@ MENU_BACKGROUND = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
 
 APPLE_IMG = pygame.image.load("dist/resources/apple.png")
 APPLE_IMG = pygame.transform.scale(APPLE_IMG, (20, 20))
+
+# Load snake skin images
+BODY_RIGHT_BOTTOM = pygame.image.load("dist/resources/body_right_top.png")
+BODY_RIGHT_TOP =  pygame.transform.rotate(BODY_RIGHT_BOTTOM, 90)
+BODY_LEFT_BOTTOM = pygame.transform.rotate(BODY_RIGHT_BOTTOM, 270)
+BODY_LEFT_TOP = pygame.transform.rotate(BODY_RIGHT_BOTTOM, 180)
+
+HEAD_DOWN_TONGUE_HIDDEN = pygame.transform.rotate(pygame.image.load("dist/resources/head_down_tongue_hidden.png"), 90)
+HEAD_DOWN_TONGUE_MID = pygame.transform.rotate(pygame.image.load("dist/resources/head_down_tongue_mid.png"), 90)
+HEAD_DOWN_TONGUE_OUT = pygame.transform.rotate(pygame.image.load("dist/resources/head_down_tongue_out.png"), 90)
+
+TAIL_UP = pygame.transform.rotate(pygame.image.load("dist/resources/tail_up.png"), 90)
+BODY_VERTICAL = pygame.image.load("dist/resources/body_vertical.png")
+BODY_HORIZONTAL = pygame.transform.rotate(BODY_VERTICAL, 90)
 
 
 class Fruit:
@@ -129,15 +143,88 @@ def main_menu():
 # drawing the snake
 def draw_snake(snake_block, snake_list, eye_state, direction, eating):
     for i, block in enumerate(snake_list):
-        pygame.draw.rect(WINDOW, GREEN, [block[0], block[1], snake_block, snake_block])
+        segment_type = None
+        segment_image = None
 
-        # draw eyes on the head of the snake
-        if i == len(snake_list) - 1:  # check if it's the head
+        # Determine the segment type
+        if i == len(snake_list) - 1:  # Head
+            segment_type = "HEAD"
+            if eating:
+                # Use different head images for eating animation
+                current_time = pygame.time.get_ticks()
+                if current_time % 300 < 100:
+                    segment_image = HEAD_DOWN_TONGUE_HIDDEN
+                elif current_time % 300 < 200:
+                    segment_image = HEAD_DOWN_TONGUE_MID
+                else:
+                    segment_image = HEAD_DOWN_TONGUE_OUT
+            else:
+                segment_image = HEAD_DOWN_TONGUE_HIDDEN
+
+            # Rotate the head image based on the direction
+            if direction == "RIGHT":
+                segment_image = pygame.transform.rotate(segment_image, 0)
+            elif direction == "LEFT":
+                segment_image = pygame.transform.rotate(segment_image, 180)
+            elif direction == "UP":
+                segment_image = pygame.transform.rotate(segment_image, 90)
+            elif direction == "DOWN":
+                segment_image = pygame.transform.rotate(segment_image, 270)
+
+        elif i == 0:  # Tail
+            segment_type = "TAIL"
+            segment_image = TAIL_UP
+
+            # Rotate the tail image based on the direction
+            if direction == "RIGHT":
+                segment_image = pygame.transform.rotate(segment_image, 180)
+            elif direction == "LEFT":
+                segment_image = pygame.transform.rotate(segment_image, 0)
+            elif direction == "UP":
+                segment_image = pygame.transform.rotate(segment_image, 270)
+            elif direction == "DOWN":
+                segment_image = pygame.transform.rotate(segment_image, 90)
+
+        else:  # Body or turning segment
+            prev_block = snake_list[i - 1]
+            next_block = snake_list[i + 1]
+
+            # Determine the direction of the current segment
+            prev_dx = block[0] - prev_block[0]
+            prev_dy = block[1] - prev_block[1]
+            next_dx = next_block[0] - block[0]
+            next_dy = next_block[1] - block[1]
+
+            if prev_dx == next_dx and prev_dy == next_dy:  # Straight segment
+                segment_type = "BODY"
+                if prev_dx == 0:  # Vertical
+                    segment_image = BODY_VERTICAL
+                else:  # Horizontal
+                    segment_image = BODY_HORIZONTAL
+            else:  # Turning segment
+                if (prev_dx == -snake_block and next_dy == -snake_block) or (prev_dy == -snake_block and next_dx == -snake_block):
+                    segment_type = "TURN_LEFT_TOP"
+                    segment_image = BODY_LEFT_TOP
+                elif (prev_dx == -snake_block and next_dy == snake_block) or (prev_dy == snake_block and next_dx == -snake_block):
+                    segment_type = "TURN_LEFT_BOTTOM"
+                    segment_image = BODY_LEFT_BOTTOM
+                elif (prev_dx == snake_block and next_dy == -snake_block) or (prev_dy == -snake_block and next_dx == snake_block):
+                    segment_type = "TURN_RIGHT_TOP"
+                    segment_image = BODY_RIGHT_TOP
+                elif (prev_dx == snake_block and next_dy == snake_block) or (prev_dy == snake_block and next_dx == snake_block):
+                    segment_type = "TURN_RIGHT_BOTTOM"
+                    segment_image = BODY_RIGHT_BOTTOM
+
+        # Draw the segment
+        if segment_image:
+            WINDOW.blit(segment_image, (block[0], block[1]))
+
+        # Draw eyes on the head (if applicable)
+        if segment_type == "HEAD":
             head_x, head_y = block[0], block[1]
-            eye_radius = 4  # radius of the eye
-            eye_offset = 5  # distance from the edge of the head
+            eye_radius = 4
+            eye_offset = 5
 
-            # determine the direction of the snake
             if direction == "RIGHT":
                 eye1_pos = (head_x + snake_block - eye_offset, head_y + eye_offset)
                 eye2_pos = (head_x + snake_block - eye_offset, head_y + snake_block - eye_offset)
@@ -151,35 +238,12 @@ def draw_snake(snake_block, snake_list, eye_state, direction, eating):
                 eye1_pos = (head_x + eye_offset, head_y + eye_offset)
                 eye2_pos = (head_x + snake_block - eye_offset, head_y + eye_offset)
 
-            # draw the eyes
             if eye_state:
                 pygame.draw.circle(WINDOW, BLACK, eye1_pos, eye_radius)
                 pygame.draw.circle(WINDOW, BLACK, eye2_pos, eye_radius)
             else:
-                # draw smaller eyes
                 pygame.draw.circle(WINDOW, BLACK, eye1_pos, eye_radius // 1.5)
                 pygame.draw.circle(WINDOW, BLACK, eye2_pos, eye_radius // 1.5)
-
-            if eating:
-                tongue_width = 8  # Increased width of the tongue
-                tongue_height = 8  # Increased height of the tongue
-                if direction == "RIGHT":
-                    pygame.draw.rect(WINDOW, RED, [head_x + snake_block, head_y + snake_block // 2 - tongue_height // 2,
-                                                   tongue_width, tongue_height])
-                elif direction == "LEFT":
-                    pygame.draw.rect(WINDOW, RED,
-                                     [head_x - tongue_width, head_y + snake_block // 2 - tongue_height // 2,
-                                      tongue_width, tongue_height])
-                elif direction == "DOWN":
-                    pygame.draw.rect(WINDOW, RED,
-                                     [head_x + snake_block // 2 - tongue_width // 2, head_y + snake_block, tongue_width,
-                                      tongue_height])
-                elif direction == "UP":
-                    pygame.draw.rect(WINDOW, RED,
-                                     [head_x + snake_block // 2 - tongue_width // 2, head_y - tongue_height,
-                                      tongue_width, tongue_height])
-
-
 # display player's score
 def display_score(score):
     value = SCORE_FONT.render("Score: " + str(score), True, YELLOW)
@@ -238,7 +302,7 @@ def game_loop():
     snake_list = []
 
     # create a Fruit object list
-    fruits = [Fruit(SNAKE_BLOCK, WIDTH, HEIGHT) for _ in range(2)]
+    fruits = [Fruit(SNAKE_BLOCK, WIDTH, HEIGHT) for _ in range(10)]
 
     # eye animation logic
     eye_state = True  # True for open, False for closed
@@ -333,7 +397,7 @@ def game_loop():
         # update snake position
         x1 += x1_change
         y1 += y1_change
-        WINDOW.fill((175, 215, 70))
+        WINDOW.fill((BLUE))
 
         # Draw all fruits
         for fruit in fruits:
