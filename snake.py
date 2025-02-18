@@ -253,15 +253,35 @@ def draw_snake(snake_block, snake_list, nose_state, direction, eating):
 
 # display player's score
 def display_score(score):
-    # Render the score text
-    score_text = SCORE_FONT.render("Score: " + str(score), True, WHITE)
+    # Render the score text with an outline and shadow
+    text = "Score: " + str(score)
+    font_size = 40
+    text_color = WHITE  # Main text color
+    outline_color = BLACK  # Outline color
+    shadow_color = (50, 50, 50)  # Shadow color (dark gray)
+    shadow_offset = 2  # Shadow offset in pixels
 
-    # Get the width and height of the score text
-    score_width = score_text.get_width()
-    score_height = score_text.get_height()
+    # Render the shadow (behind the main text)
+    shadow_text = SCORE_FONT.render(text, True, shadow_color)
+    shadow_x = 10 + shadow_offset
+    shadow_y = 10 + shadow_offset
+    WINDOW.blit(shadow_text, (shadow_x, shadow_y))
 
-    # Draw the score text in the top-left corner
-    WINDOW.blit(score_text, [10, 10])  # Adjusted position for better spacing
+    # Render the outline (around the main text)
+    outline_offset = 1  # Outline thickness
+    for dx in [-outline_offset, 0, outline_offset]:
+        for dy in [-outline_offset, 0, outline_offset]:
+            if dx != 0 or dy != 0:  # Skip the center (main text)
+                outline_text = SCORE_FONT.render(text, True, outline_color)
+                WINDOW.blit(outline_text, (10 + dx, 10 + dy))
+
+    # Render the main text (on top of the outline and shadow)
+    main_text = SCORE_FONT.render(text, True, text_color)
+    WINDOW.blit(main_text, (10, 10))
+
+    # Get the width and height of the main text
+    score_width = main_text.get_width()
+    score_height = main_text.get_height()
 
     # Scale the apple icon to match the height of the text
     apple_icon_scaled = pygame.transform.scale(APPLE_IMG, (score_height, score_height))
