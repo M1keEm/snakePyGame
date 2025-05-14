@@ -53,6 +53,8 @@ ENDGAME_BACKGROUND = pygame.transform.scale(ENDGAME_BACKGROUND, (WIDTH, HEIGHT))
 
 APPLE_IMG = pygame.image.load(resource_path("dist/resources/apple.png"))
 APPLE_IMG_SCALED = pygame.transform.scale(APPLE_IMG, (20, 20))
+WATERMELON_IMG = pygame.image.load(resource_path("dist/resources/watermelon.png"))
+WATERMELON_IMG = pygame.transform.scale(WATERMELON_IMG, (20, 20))
 
 SPRITE_SHEET = pygame.image.load(resource_path("dist/resources/sprite_sheet.png"))
 
@@ -94,7 +96,7 @@ class Fruit:
             self.points = 1
             self.speed_boost = 0
         elif fruit_type == "watermelon":
-            self.image = pygame.image.load(resource_path("dist/resources/watermelon.jpeg")).convert_alpha()
+            self.image = WATERMELON_IMG
             self.points = 2
             self.speed_boost = 4  # Temporary speed boost amount
 
