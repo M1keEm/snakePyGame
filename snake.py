@@ -162,7 +162,7 @@ def main_menu():
     menu = True
     while menu:
         WINDOW.blit(MENU_BACKGROUND, (0, 0))
-        message("Welcome to Snake Game!", WHITE, -270, MENU_FONT)
+        message("Welcome to the Snake Game!", WHITE, -270, MENU_FONT)
         message("Press SPACE to play", WHITE, 30)
         message("Press Q or ESCAPE to quit", WHITE, 100)
 
