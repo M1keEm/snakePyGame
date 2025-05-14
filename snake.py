@@ -81,13 +81,23 @@ BODY_HORIZONTAL = pygame.transform.rotate(BODY_VERTICAL, 90)
 
 
 class Fruit:
-    def __init__(self, snake_block, width, height):
+    def __init__(self, snake_block, width, height, fruit_type="apple"):
         self.x = None
         self.y = None
         self.snake_block = snake_block
         self.width = width
         self.height = height
-        self.image = pygame.image.load(resource_path("dist/resources/apple.png")).convert_alpha()
+        self.fruit_type = fruit_type
+
+        if fruit_type == "apple":
+            self.image = pygame.image.load(resource_path("dist/resources/apple.png")).convert_alpha()
+            self.points = 1
+            self.speed_boost = 0
+        elif fruit_type == "watermelon":
+            self.image = pygame.image.load(resource_path("dist/resources/watermelon.jpeg")).convert_alpha()
+            self.points = 2
+            self.speed_boost = 3  # Temporary speed boost amount
+
         self.image = pygame.transform.scale(self.image, (snake_block, snake_block))
         self.reset_position()
 
@@ -142,8 +152,6 @@ class Particle:
         if self.lifespan > 0:
             pygame.draw.circle(WINDOW, self.color, (int(self.x), int(self.y)), 1)
 
-
-# eat_sound = pygame.mixer.Sound("dist/resources/eat_sound.wav")
 
 def load_high_score():
     """Load the high score from a file. If the file doesn't exist, return 0."""
@@ -287,7 +295,7 @@ def draw_snake(snake_block, snake_list, nose_state, direction, eating):
 
 
 # display player's score
-def display_score(score):
+def display_score(score, speed_boost_active=False):
     # Load the high score
     high_score = load_high_score()
     # Render the score text with an outline and shadow
@@ -326,6 +334,11 @@ def display_score(score):
     apple_icon_x = 10 + score_width + 10  # 10 pixels padding after the score text
     apple_icon_y = 10  # Align with the score text vertically
     WINDOW.blit(apple_icon_scaled, (apple_icon_x, apple_icon_y))
+
+    # If speed boost is active, show an indicator
+    if speed_boost_active:
+        boost_text = SCORE_FONT.render("SPEED BOOST!", True, RED)
+        WINDOW.blit(boost_text, (WIDTH - boost_text.get_width() - 10, 10))
 
 
 def message(msg, color, y_offset=0, font=None):
@@ -393,8 +406,18 @@ def game_loop():
     snake_length = 1
     snake_list = []
 
-    # create a Fruit object list
+    # Fruit tracking variables
+    apples_eaten = 0
+    next_watermelon_spawn = random.randint(4, 10)  # Spawn watermelon after eating 4-10 apples
+
+    # create a Fruit object list - start with just apples
     fruits = [Fruit(SNAKE_BLOCK, WIDTH, HEIGHT) for _ in range(2)]
+
+    # Speed boost tracking
+    speed_boost_active = False
+    speed_boost_start_time = 0
+    speed_boost_duration = 5000  # 5 seconds boost
+    original_fps = current_fps
 
     # nose animation logic
     nose_state = True  # True for open, False for closed
@@ -513,31 +536,60 @@ def game_loop():
 
         # update eye animation
         current_time = pygame.time.get_ticks()
+
+        # Check if speed boost has expired
+        if speed_boost_active and current_time - speed_boost_start_time > speed_boost_duration:
+            speed_boost_active = False
+            current_fps = original_fps  # Reset speed to normal
+
         if current_time - last_breath_time > blink_interval:
             nose_state = not nose_state  # toggle nose state
             last_breath_time = current_time
 
         # check if snake eats any fruit
-        for fruit in fruits:
+        for i, fruit in enumerate(fruits[:]):
             if fruit.is_eaten(snake_head):
-                fruit.reset_position(snake_list, fruits)
-                snake_length += 1
-                eating = True  # start eating animation
-                eating_start_time = pygame.time.get_ticks()
+                # Add points based on fruit type
+                snake_length += fruit.points
 
-                # play eat sound
+                # Handle speed boost for watermelon
+                if fruit.fruit_type == "watermelon":
+                    speed_boost_active = True
+                    original_fps = current_fps  # Store current speed
+                    current_fps += fruit.speed_boost
+                    speed_boost_start_time = pygame.time.get_ticks()
+                    # Remove the watermelon
+                    fruits.remove(fruit)
+                else:  # It's an apple
+                    apples_eaten += 1
+                    # Create a new apple to replace the eaten one
+                    fruit.reset_position(snake_list, fruits)
+
+                    # Check if we should spawn a watermelon
+                    if apples_eaten >= next_watermelon_spawn and not any(f.fruit_type == "watermelon" for f in fruits):
+                        fruits.append(Fruit(SNAKE_BLOCK, WIDTH, HEIGHT, "watermelon"))
+                        next_watermelon_spawn = apples_eaten + random.randint(1, 1)  # Set next watermelon spawn
+
+                eating = True
+                eating_start_time = pygame.time.get_ticks()
                 eat_sound.play()
 
-                # create particles
                 current_fps += speed_increment
                 CLOCK.tick(current_fps)
-
                 pygame.mixer.music.set_volume(
                     min(1.0,
-                        max(0.1, pygame.mixer.music.get_volume() + 0.05)))  # Increase volume slightly, max volume 1.0
-                if snake_length > 1:
-                    for _ in range(20):  # create 20 particles
-                        particles.append(Particle(fruit.x + SNAKE_BLOCK // 2, fruit.y + SNAKE_BLOCK // 2, RED))
+                        max(0.1, pygame.mixer.music.get_volume() + 0.03)))  # Increase volume slightly, max volume 1.0
+
+                # Create particles
+                if fruit.fruit_type == "watermelon":
+                    particle_color = BLUE  # Yellow particles for speed boost
+                else:
+                    particle_color = RED  # Red particles for regular eating
+
+                for _ in range(20):
+                    particles.append(Particle(fruit.x + SNAKE_BLOCK // 2, fruit.y + SNAKE_BLOCK // 2, particle_color))
+
+                break  # Exit the loop since we modified the fruits list
 
         # update eating animation
         if eating and current_time - eating_start_time > eating_duration:
@@ -552,8 +604,8 @@ def game_loop():
 
         # draw the snake
         draw_snake(SNAKE_BLOCK, snake_list, nose_state, direction, eating)
-        # display current score
-        display_score(snake_length - 1)
+        # display current score with speed boost indicator
+        display_score(snake_length - 1, speed_boost_active)
         pygame.display.update()
 
         CLOCK.tick(current_fps)
