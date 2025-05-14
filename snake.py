@@ -28,6 +28,7 @@ YELLOW = (255, 255, 102)
 BLUE = (50, 153, 213)
 SHADOW_COLOR = (50, 50, 50)
 
+
 def resource_path(relative_path):
     """Get the absolute path to the resource, works for dev and for PyInstaller"""
     try:
@@ -36,6 +37,7 @@ def resource_path(relative_path):
     except Exception:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
+
 
 pygame.init()
 
@@ -46,6 +48,9 @@ pygame.display.set_caption("Snake Game")
 # Clock - game speed
 CLOCK = pygame.time.Clock()
 current_fps = FPS_BASE
+
+# Game music state global variable
+muted = False
 
 # Load resources
 FONT_STYLE = pygame.font.Font(resource_path("dist/resources/Snake Chan/Snake Chan.ttf"), 40)
@@ -72,11 +77,13 @@ SPRITE_SHEET = pygame.image.load(resource_path("dist/resources/sprite_sheet.png"
 eat_sound = pygame.mixer.Sound(resource_path("dist/resources/eat_sound.wav"))
 pygame.mixer.music.load(resource_path("dist/resources/background_music.mp3"))
 
+
 def get_sprite(sheet, x, y, width, height):
     """Extract a sprite from a sprite sheet"""
     image = pygame.Surface((width, height), pygame.SRCALPHA)
     image.blit(sheet, (0, 0), (x, y, width, height))
     return image
+
 
 # Load snake skin images
 TAIL_UP = pygame.transform.rotate(get_sprite(SPRITE_SHEET, 40, 0, 20, 20), 90)
@@ -240,13 +247,17 @@ def draw_snake(snake_block, snake_list, nose_state, direction, eating):
             if prev_dx == next_dx and prev_dy == next_dy:  # Straight segment
                 segment_image = BODY_VERTICAL if prev_dx == 0 else BODY_HORIZONTAL
             else:  # Turning segment
-                if (prev_dx == snake_block and next_dy == -snake_block) or (prev_dy == snake_block and next_dx == -snake_block):
+                if (prev_dx == snake_block and next_dy == -snake_block) or (
+                        prev_dy == snake_block and next_dx == -snake_block):
                     segment_image = BODY_RIGHT_BOTTOM
-                elif (prev_dx == -snake_block and next_dy == snake_block) or (prev_dy == -snake_block and next_dx == snake_block):
+                elif (prev_dx == -snake_block and next_dy == snake_block) or (
+                        prev_dy == -snake_block and next_dx == snake_block):
                     segment_image = BODY_LEFT_TOP
-                elif (prev_dx == -snake_block and next_dy == -snake_block) or (prev_dy == snake_block and next_dx == snake_block):
+                elif (prev_dx == -snake_block and next_dy == -snake_block) or (
+                        prev_dy == snake_block and next_dx == snake_block):
                     segment_image = BODY_LEFT_BOTTOM
-                elif (prev_dx == snake_block and next_dy == snake_block) or (prev_dy == -snake_block and next_dx == -snake_block):
+                elif (prev_dx == snake_block and next_dy == snake_block) or (
+                        prev_dy == -snake_block and next_dx == -snake_block):
                     segment_image = BODY_RIGHT_TOP
 
         # Draw segment
@@ -278,16 +289,22 @@ def draw_snake(snake_block, snake_list, nose_state, direction, eating):
             pygame.draw.circle(WINDOW, BLACK, nose1_pos, radius)
             pygame.draw.circle(WINDOW, BLACK, nose2_pos, radius)
 
+
 def lerp_color(color1, color2, t):
     """Linearly interpolate between two colors."""
     return tuple(int(a + (b - a) * t) for a, b in zip(color1, color2))
+
 
 def display_score(score, speed_boost_active=False):
     """Display the current score and high score with visual effects"""
     high_score = load_high_score()
     text = f"Score: {score} High Score: {high_score}"
 
-    # Render shadow
+    if muted:
+        mute_text = "MUTED"
+        mute_surface = SCORE_FONT.render(mute_text, True, WHITE)
+        WINDOW.blit(mute_surface, (WIDTH - mute_surface.get_width() - 10, HEIGHT - mute_surface.get_height() - 10))
+        # Render shadow
     shadow_text = SCORE_FONT.render(text, True, SHADOW_COLOR)
     WINDOW.blit(shadow_text, (12, 12))  # Shadow offset of 2px
 
@@ -400,7 +417,7 @@ def main_menu():
 
 def game_loop():
     """Main game loop handling all game mechanics"""
-    global current_fps
+    global current_fps, muted
     game_over = False
     game_close = False
     paused = False
@@ -481,6 +498,12 @@ def game_loop():
                 elif event.key == pygame.K_p:
                     paused = not paused
                     pygame.mixer.music.pause() if paused else pygame.mixer.music.unpause()
+                elif event.key == pygame.K_m:
+                    muted = not muted
+                    if muted:
+                        pygame.mixer.music.set_volume(0)
+                    else:
+                        pygame.mixer.music.set_volume(0.02)
 
         if paused:
             continue
@@ -545,7 +568,8 @@ def game_loop():
                 snake_length += fruit.points
                 eating = True
                 eating_start_time = current_time
-                eat_sound.play()
+                if not muted:
+                    eat_sound.play()
 
                 # Handle fruit effects
                 if fruit.fruit_type == "watermelon":
@@ -569,7 +593,8 @@ def game_loop():
 
                 # Increase game speed slightly
                 current_fps += SPEED_INCREMENT
-                pygame.mixer.music.set_volume(min(1.0, max(0.1, pygame.mixer.music.get_volume() + 0.03)))
+                if not muted:
+                    pygame.mixer.music.set_volume(min(1.0, max(0.1, pygame.mixer.music.get_volume() + 0.03)))
                 break
 
         # Update eating animation
