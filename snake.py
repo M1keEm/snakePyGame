@@ -96,7 +96,7 @@ class Fruit:
         elif fruit_type == "watermelon":
             self.image = pygame.image.load(resource_path("dist/resources/watermelon.jpeg")).convert_alpha()
             self.points = 2
-            self.speed_boost = 3  # Temporary speed boost amount
+            self.speed_boost = 4  # Temporary speed boost amount
 
         self.image = pygame.transform.scale(self.image, (snake_block, snake_block))
         self.reset_position()
@@ -141,7 +141,7 @@ class Particle:
         self.color = color
         self.vx = random.uniform(-1, 1)  # Random horizontal velocity
         self.vy = random.uniform(-1, 1)  # Random vertical velocity
-        self.lifespan = 30  # Number of frames the particle will live
+        self.lifespan = 35  # Number of frames the particle will live
 
     def update(self):
         self.x += self.vx
