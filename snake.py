@@ -1,3 +1,4 @@
+import math
 import random
 import pygame
 from collections import deque
@@ -277,6 +278,9 @@ def draw_snake(snake_block, snake_list, nose_state, direction, eating):
             pygame.draw.circle(WINDOW, BLACK, nose1_pos, radius)
             pygame.draw.circle(WINDOW, BLACK, nose2_pos, radius)
 
+def lerp_color(color1, color2, t):
+    """Linearly interpolate between two colors."""
+    return tuple(int(a + (b - a) * t) for a, b in zip(color1, color2))
 
 def display_score(score, speed_boost_active=False):
     """Display the current score and high score with visual effects"""
@@ -308,15 +312,22 @@ def display_score(score, speed_boost_active=False):
     # Show speed boost indicator
     if speed_boost_active:
         boost_text = "SPEED BOOST!"
-        # Draw outline
+        # Pulsate color: white -> red -> yellow -> white
+        t = (math.sin(pygame.time.get_ticks() / 300) + 1) / 2  # t in [0,1]
+        if t < 0.5:
+            # White to Red
+            color = lerp_color((255, 255, 255), (255, 0, 0), t * 2)
+        else:
+            # Red to Yellow
+            color = lerp_color((255, 0, 0), (255, 255, 0), (t - 0.5) * 2)
+
         outline_size = 3
         for dx in range(-outline_size, outline_size + 1):
             for dy in range(-outline_size, outline_size + 1):
                 if dx != 0 or dy != 0:
                     outline_surface = SCORE_FONT.render(boost_text, True, BLACK)
                     WINDOW.blit(outline_surface, (WIDTH - SCORE_FONT.size(boost_text)[0] - 10 + dx, 40 + dy))
-        # Draw main text
-        main_surface = SCORE_FONT.render(boost_text, True, (255, 200, 0))  # Bright orange
+        main_surface = SCORE_FONT.render(boost_text, True, color)
         WINDOW.blit(main_surface, (WIDTH - SCORE_FONT.size(boost_text)[0] - 10, 40))
 
 
