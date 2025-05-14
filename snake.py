@@ -162,9 +162,9 @@ def main_menu():
     menu = True
     while menu:
         WINDOW.blit(MENU_BACKGROUND, (0, 0))
-        message("Welcome to Snake Game!", WHITE, -50, MENU_FONT)
-        message("Press SPACE to play", WHITE, 0)
-        message("Press Q/ESCAPE to quit", WHITE, 50)
+        message("Welcome to Snake Game!", WHITE, -270, MENU_FONT)
+        message("Press SPACE to play", WHITE, 30)
+        message("Press Q or ESCAPE to quit", WHITE, 100)
 
         pygame.display.update()
 
@@ -422,7 +422,8 @@ def game_loop():
                 save_high_score(high_score)
 
             WINDOW.fill(BLACK)
-            message("You Lost! Press Q/ESCAPE-Quit or Space-Play Again", RED)
+            message("You Lost! Press Q or ESCAPE to Quit", RED, -30)
+            message("Press SPACE to Play Again", WHITE, 70)
             display_score(snake_length - 1)
             pygame.mixer.music.stop()
             pygame.display.update()
