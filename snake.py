@@ -48,6 +48,8 @@ MENU_FONT = pygame.font.Font(resource_path("dist/resources/Snake Chan/Snake Chan
 MENU_BACKGROUND = pygame.image.load(resource_path("dist/resources/menu_background.jpg"))
 MENU_BACKGROUND = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
 GAME_BACKGROUND = pygame.image.load(resource_path("dist/resources/background_snake.png"))
+ENDGAME_BACKGROUND = pygame.image.load(resource_path("dist/resources/endgame_background.png"))
+ENDGAME_BACKGROUND = pygame.transform.scale(ENDGAME_BACKGROUND, (WIDTH, HEIGHT))
 
 APPLE_IMG = pygame.image.load(resource_path("dist/resources/apple.png"))
 APPLE_IMG_SCALED = pygame.transform.scale(APPLE_IMG, (20, 20))
@@ -421,7 +423,7 @@ def game_loop():
                 high_score = current_score
                 save_high_score(high_score)
 
-            WINDOW.fill(BLACK)
+            WINDOW.blit(ENDGAME_BACKGROUND, (0, 0))
             message("You Lost! Press Q or ESCAPE to Quit", RED, -30)
             message("Press SPACE to Play Again", WHITE, 70)
             display_score(snake_length - 1)
