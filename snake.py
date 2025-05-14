@@ -307,8 +307,17 @@ def display_score(score, speed_boost_active=False):
 
     # Show speed boost indicator
     if speed_boost_active:
-        boost_text = SCORE_FONT.render("SPEED BOOST!", True, YELLOW)
-        WINDOW.blit(boost_text, (WIDTH - boost_text.get_width() - 10, 10))
+        boost_text = "SPEED BOOST!"
+        # Draw outline
+        outline_size = 3
+        for dx in range(-outline_size, outline_size + 1):
+            for dy in range(-outline_size, outline_size + 1):
+                if dx != 0 or dy != 0:
+                    outline_surface = SCORE_FONT.render(boost_text, True, BLACK)
+                    WINDOW.blit(outline_surface, (WIDTH - SCORE_FONT.size(boost_text)[0] - 10 + dx, 40 + dy))
+        # Draw main text
+        main_surface = SCORE_FONT.render(boost_text, True, (255, 200, 0))  # Bright orange
+        WINDOW.blit(main_surface, (WIDTH - SCORE_FONT.size(boost_text)[0] - 10, 40))
 
 
 def message(msg, color, y_offset=0, font=None):
