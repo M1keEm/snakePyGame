@@ -569,8 +569,13 @@ def game_loop():
 
                     # Check if we should spawn a watermelon
                     if apples_eaten >= next_watermelon_spawn and not any(f.fruit_type == "watermelon" for f in fruits):
-                        fruits.append(Fruit(SNAKE_BLOCK, WIDTH, HEIGHT, "watermelon"))
+                        new_watermelon = Fruit(SNAKE_BLOCK, WIDTH, HEIGHT, "watermelon")
+                        fruits.append(new_watermelon)
                         next_watermelon_spawn = apples_eaten + random.randint(1, 1)  # Set next watermelon spawn
+
+                        # Create particles for watermelon spawn
+                        for _ in range(20):
+                            particles.append(Particle(new_watermelon.x + SNAKE_BLOCK // 2, new_watermelon.y + SNAKE_BLOCK // 2, BLUE))
 
                 eating = True
                 eating_start_time = pygame.time.get_ticks()
