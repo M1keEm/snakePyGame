@@ -370,10 +370,12 @@ def main_menu():
                     game_loop()
                 if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
                     pygame.quit()
-                    quit()
+                    sys.exit()
+                    # quit()
             if event.type == pygame.QUIT:
                 pygame.quit()
-                quit()
+                sys.exit()
+                # quit()
 
 
 def game_loop():
@@ -569,7 +571,8 @@ def game_loop():
         CLOCK.tick(current_fps)
 
     pygame.quit()
-    quit()
+    sys.exit()
+    # quit()
 
 
 # Start the game
