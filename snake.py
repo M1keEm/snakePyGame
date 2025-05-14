@@ -5,6 +5,7 @@ from collections import deque
 import os
 import sys
 
+
 def resource_path(relative_path):
     """ Get the absolute path to the resource, works for dev and for PyInstaller """
     try:
@@ -44,7 +45,7 @@ FONT_STYLE = pygame.font.SysFont("bahnschrift", 40)
 SCORE_FONT = pygame.font.SysFont("comicsansms", 35)
 MENU_FONT = pygame.font.SysFont("comicsansms", 50)
 
-MENU_BACKGROUND = pygame.image.load(resource_path("dist/resources/menu_background.png"))
+MENU_BACKGROUND = pygame.image.load(resource_path("dist/resources/menu_background.jpg"))
 MENU_BACKGROUND = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
 GAME_BACKGROUND = pygame.image.load(resource_path("dist/resources/background_snake.png"))
 
@@ -55,6 +56,7 @@ SPRITE_SHEET = pygame.image.load(resource_path("dist/resources/sprite_sheet.png"
 
 eat_sound = pygame.mixer.Sound(resource_path("dist/resources/eat_sound.wav"))
 pygame.mixer.music.load(resource_path("dist/resources/background_music.mp3"))
+
 
 def get_sprite(sheet, x, y, width, height):
     image = pygame.Surface((width, height), pygame.SRCALPHA)
