@@ -92,7 +92,7 @@ class Fruit:
         self.fruit_type = fruit_type
 
         if fruit_type == "apple":
-            self.image = pygame.image.load(resource_path("dist/resources/apple.png")).convert_alpha()
+            self.image = APPLE_IMG_SCALED
             self.points = 1
             self.speed_boost = 0
         elif fruit_type == "watermelon":
