@@ -41,9 +41,9 @@ current_fps = 10
 speed_increment = 1
 
 # font style
-FONT_STYLE = pygame.font.SysFont("bahnschrift", 40)
-SCORE_FONT = pygame.font.SysFont("comicsansms", 35)
-MENU_FONT = pygame.font.SysFont("comicsansms", 50)
+FONT_STYLE = pygame.font.Font(resource_path("dist/resources/Snake Chan/Snake Chan.ttf"), 40)
+SCORE_FONT = pygame.font.Font(resource_path("dist/resources/Snake Chan/Snake Chan.ttf"), 35)
+MENU_FONT = pygame.font.Font(resource_path("dist/resources/Snake Chan/Snake Chan.ttf"), 40)
 
 MENU_BACKGROUND = pygame.image.load(resource_path("dist/resources/menu_background.jpg"))
 MENU_BACKGROUND = pygame.transform.scale(MENU_BACKGROUND, (WIDTH, HEIGHT))
@@ -335,26 +335,38 @@ def message(msg, color, y_offset=0, font=None):
     lines = []
     current_line = ''
     for word in words:
-        # check if adding the word to the current line will exceed the width of the window
         test_line = current_line + ' ' + word if current_line else word
-        test_width, _ = font.size(test_line)  # get the width of the text, ignore the height
+        test_width, _ = font.size(test_line)
         if test_width > WIDTH - 40:
             lines.append(current_line)
             current_line = word
         else:
             current_line = test_line
     if current_line:
-        lines.append(current_line)  # add the last line
+        lines.append(current_line)
 
     # calculate the y position of the text and center it
     total_height = len(lines) * font.get_height()
     y_start = (HEIGHT - total_height) / 2 + y_offset
 
+    # draw the text with outline
+    outline_color = BLACK  # outline color
+    outline_size = 2  # thickness of outline
+
     # draw the text
     for i, line in enumerate(lines):
-        test_surface = font.render(line, True, color)
-        text_rect = test_surface.get_rect(center=(WIDTH / 2, y_start + i * font.get_height()))
-        WINDOW.blit(test_surface, text_rect)
+        # Draw outline by rendering the text multiple times with offsets
+        for dx in range(-outline_size, outline_size + 1, 1):
+            for dy in range(-outline_size, outline_size + 1, 1):
+                if dx != 0 or dy != 0:  # Skip the center (main text)
+                    outline_surface = font.render(line, True, outline_color)
+                    text_rect = outline_surface.get_rect(center=(WIDTH / 2 + dx, y_start + i * font.get_height() + dy))
+                    WINDOW.blit(outline_surface, text_rect)
+
+        # Draw the main text on top
+        text_surface = font.render(line, True, color)
+        text_rect = text_surface.get_rect(center=(WIDTH / 2, y_start + i * font.get_height()))
+        WINDOW.blit(text_surface, text_rect)
 
 
 # main game loop
